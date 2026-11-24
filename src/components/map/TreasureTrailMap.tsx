@@ -158,7 +158,11 @@ export function TreasureTrailMap({
                       {challenge.title}
                     </span>
                     <span className="mt-0.5 text-[11px] text-slate-300/80">
-                      {isCompleted ? `Solved · Clue ${challenge.clueToken}` : isNext ? 'Current Step' : challenge.discipline}
+                      {isCompleted
+                        ? `Solved · Clue ${challenge.clueToken}`
+                        : isNext
+                          ? `${challenge.difficulty} · Current`
+                          : `${challenge.difficulty} · ${challenge.discipline}`}
                     </span>
                   </div>
 

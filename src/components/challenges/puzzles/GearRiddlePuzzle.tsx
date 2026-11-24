@@ -24,7 +24,7 @@ export function GearRiddlePuzzle({ isSolved, onSolve, onWrongAttempt }: GearRidd
     } else {
       soundEngine.play('error');
       onWrongAttempt(
-        'Check both mesh direction and gear ratio: Gear A (24T) drives B (16T) opposite, which drives C (12T) back to clockwise at 24 ÷ 12 = 2 turns.'
+        'Check the two parts separately: each gear mesh reverses direction, and the output speed is 24 / 12 = 2 turns. The middle gear changes direction, not the final ratio.'
       );
     }
   };
@@ -33,10 +33,10 @@ export function GearRiddlePuzzle({ isSolved, onSolve, onWrongAttempt }: GearRidd
     <div className="space-y-6">
       <div className="rounded-2xl border border-white/10 bg-[#051029]/70 p-4 sm:p-5 space-y-2">
         <p className="text-sm text-slate-200 leading-relaxed">
-          Workshop Schematic: <span className="font-semibold text-[#F5C542]">Gear A (24 teeth)</span> turns <span className="font-semibold text-white">1 full rotation clockwise</span>. It meshes with <span className="font-semibold text-white">Gear B (16 teeth)</span>, which meshes with <span className="font-semibold text-white">Gear C (12 teeth)</span>.
+          Build farm schematic: <span className="font-semibold text-[#F5C542]">Gear A (24 teeth)</span> turns <span className="font-semibold text-white">1 full rotation clockwise</span>. It drives <span className="font-semibold text-white">Gear B (16 teeth)</span>, which drives <span className="font-semibold text-white">Gear C (12 teeth)</span>.
         </p>
         <p className="text-xs text-slate-300">
-          Determine the rotation direction and total turns of Gear C.
+          Predict Gear C's direction and number of turns. No benchmarking laptop required.
         </p>
       </div>
 

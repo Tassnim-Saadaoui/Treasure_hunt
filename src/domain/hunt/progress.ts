@@ -33,7 +33,7 @@ export function normalizeProgressState(value: unknown): HuntProgressState {
   }
 
   return {
-    profile: isExplorerProfile(candidate.profile) ? candidate.profile : null,
+    profile: normalizeExplorerProfile(candidate.profile),
     completedIds,
     hintsUsedByChallenge,
     startedAt: isTimestamp(candidate.startedAt) ? candidate.startedAt : null,
@@ -107,13 +107,28 @@ function isTimestamp(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
-function isExplorerProfile(value: unknown): value is ExplorerProfile {
-  if (!value || typeof value !== 'object') return false;
-  const profile = value as Partial<ExplorerProfile>;
-  return (
-    typeof profile.explorerName === 'string' &&
-    typeof profile.teamName === 'string' &&
-    ['Navigation', 'Engineering', 'Cryptography', 'Strategy'].includes(profile.specialty ?? '') &&
-    isTimestamp(profile.joinedAt)
-  );
+function normalizeExplorerProfile(value: unknown): ExplorerProfile | null {
+  if (!value || typeof value !== 'object') return null;
+  const profile = value as Partial<ExplorerProfile> & { specialty?: string };
+  if (
+    typeof profile.explorerName !== 'string' ||
+    typeof profile.teamName !== 'string' ||
+    !isTimestamp(profile.joinedAt)
+  ) {
+    return null;
+  }
+
+  const legacyRoles: Record<string, ExplorerProfile['specialty']> = {
+    Navigation: 'Frontend',
+    Engineering: 'Backend',
+    Cryptography: 'QA / Testing',
+    Strategy: 'DevOps',
+  };
+  const currentRoles: string[] = ['Frontend', 'Backend', 'DevOps', 'QA / Testing'];
+  const specialtyValue = String(profile.specialty ?? '');
+  const specialty = currentRoles.includes(specialtyValue)
+    ? (specialtyValue as ExplorerProfile['specialty'])
+    : legacyRoles[specialtyValue];
+
+  return specialty ? { ...profile, specialty } as ExplorerProfile : null;
 }

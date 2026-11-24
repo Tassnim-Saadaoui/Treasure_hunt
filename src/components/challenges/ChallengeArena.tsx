@@ -46,7 +46,7 @@ export function ChallengeArena({
     onComplete(challenge.id);
     setFeedback({
       type: 'success',
-      text: `${challenge.numberLabel} solved! Clue token ${challenge.clueToken} added to your expedition log.`,
+      text: `${challenge.numberLabel} passed. Clue token ${challenge.clueToken} added to your log. The test suite has no further objections.`,
     });
   };
 
@@ -114,6 +114,8 @@ export function ChallengeArena({
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300">
               <span className="font-semibold text-[#F5C542]">{challenge.numberLabel}</span>
+              <span aria-hidden="true">·</span>
+              <span className="font-semibold text-emerald-300">{challenge.difficulty}</span>
               <span aria-hidden="true">·</span>
               <span>{challenge.discipline}</span>
               <span aria-hidden="true">·</span>
@@ -191,7 +193,7 @@ export function ChallengeArena({
               )}
               <p className="text-sm leading-relaxed">
                 {feedback?.text ??
-                  `Solved · Clue token ${challenge.clueToken} recorded in your expedition log.`}
+                  `Passed. Clue token ${challenge.clueToken} recorded. Production has not caught fire (yet).`}
               </p>
             </div>
 

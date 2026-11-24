@@ -12,6 +12,7 @@ export type ChallengeStatus = 'locked' | 'active' | 'completed';
 export interface ChallengeDefinition {
   id: ChallengeId;
   numberLabel: string;
+  difficulty: 'Warm-up' | 'Easy' | 'Intermediate' | 'Hard' | 'Final Boss';
   title: string;
   discipline: string;
   shortPrompt: string;
@@ -26,7 +27,7 @@ export interface ChallengeDefinition {
 export interface ExplorerProfile {
   explorerName: string;
   teamName: string;
-  specialty: 'Navigation' | 'Engineering' | 'Cryptography' | 'Strategy';
+  specialty: 'Frontend' | 'Backend' | 'DevOps' | 'QA / Testing';
   joinedAt: number;
 }
 

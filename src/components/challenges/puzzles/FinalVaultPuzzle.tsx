@@ -18,7 +18,7 @@ export function FinalVaultPuzzle({
   onWrongAttempt,
 }: FinalVaultPuzzleProps) {
   const [digits, setDigits] = useState<[number, number, number, number]>(
-    isSolved ? [4, 7, 2, 9] : [0, 0, 0, 0]
+    isSolved ? [9, 7, 4, 2] : [0, 0, 0, 0]
   );
 
   const firstFour = CHALLENGES.slice(0, 4);
@@ -33,13 +33,13 @@ export function FinalVaultPuzzle({
   };
 
   const handleUnlock = () => {
-    if (digits.join('') === '4729') {
+    if (digits.join('') === '9742') {
       soundEngine.play('treasureFanfare');
       onSolve();
     } else {
       soundEngine.play('error');
       onWrongAttempt(
-        'Vault tumblers did not align. Combine the digits inside the Clue Tokens from Challenges 1 to 4 (N4, T7, G2, E9).'
+        'The vault rejected that trace. Follow the request from entry to storage: Router, Identity, Cache, Database. Take the digit from each matching token.'
       );
     }
   };
@@ -48,7 +48,7 @@ export function FinalVaultPuzzle({
     <div className="space-y-6">
       <div className="rounded-2xl border border-white/10 bg-[#051029]/70 p-4 sm:p-5 space-y-2">
         <p className="text-sm text-slate-200 leading-relaxed">
-          Align the four golden key tumblers using the numeric digits from the first four Clue Tokens (<span className="font-mono text-[#F5C542]">N4 · T7 · G2 · E9</span>).
+          Trace the request through <span className="font-semibold text-[#F5C542]">Router → Identity → Cache → Database</span>. Take the digit from each service's clue token, in that order.
         </p>
         <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-300">
           {firstFour.map((c) => {
@@ -101,7 +101,7 @@ export function FinalVaultPuzzle({
         className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[#C8102E] px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(200,16,46,0.4)] transition-transform duration-150 hover:bg-[#E11D3F] active:scale-[0.98]"
       >
         <KeyRound className="h-4 w-4" />
-        <span>{isSolved ? 'Vault Unlocked · 4-7-2-9' : 'Turn Golden Key'}</span>
+        <span>{isSolved ? 'Vault Unlocked · 9-7-4-2' : 'Run the Production Check'}</span>
       </button>
     </div>
   );

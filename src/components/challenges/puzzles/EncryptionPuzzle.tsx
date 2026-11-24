@@ -8,26 +8,26 @@ interface EncryptionPuzzleProps {
 }
 
 const BYTES = [
+  { binary: '0101 0011', decimal: 83, index: 19 },
   { binary: '0100 1000', decimal: 72, index: 8 },
-  { binary: '0101 0101', decimal: 85, index: 21 },
-  { binary: '0100 1110', decimal: 78, index: 14 },
-  { binary: '0101 0100', decimal: 84, index: 20 },
+  { binary: '0100 1001', decimal: 73, index: 9 },
+  { binary: '0101 0000', decimal: 80, index: 16 },
 ] as const;
 
 export function EncryptionPuzzle({ isSolved, onSolve, onWrongAttempt }: EncryptionPuzzleProps) {
-  const [answer, setAnswer] = useState<string>(isSolved ? 'HUNT' : '');
+  const [answer, setAnswer] = useState<string>(isSolved ? 'SHIP' : '');
   const [inspectedIdx, setInspectedIdx] = useState<number | null>(null);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const cleaned = answer.trim().toUpperCase();
-    if (cleaned === 'HUNT') {
+    if (cleaned === 'SHIP') {
       soundEngine.play('correct');
       onSolve();
     } else {
       soundEngine.play('error');
       onWrongAttempt(
-        'Incorrect cipher word. Remember: ASCII 65 = A (1st letter), 66 = B (2nd), ..., 72 = H (8th).'
+        'That is not the release instruction. Decode each 8-bit byte as one ASCII character, in order; the CI runner is not being poetic.'
       );
     }
   };
@@ -36,10 +36,10 @@ export function EncryptionPuzzle({ isSolved, onSolve, onWrongAttempt }: Encrypti
     <div className="space-y-6">
       <div className="rounded-2xl border border-white/10 bg-[#051029]/70 p-4 sm:p-5 space-y-1.5">
         <p className="text-sm text-slate-200 leading-relaxed">
-          Tap any 8-bit circuit register to inspect its decimal ASCII code, then enter the 4-letter passkey.
+          Decode the four bytes from left to right and enter what the release is ready to do. Inspect a byte to see its decimal ASCII value.
         </p>
         <p className="text-xs text-slate-400">
-          Reference: 0100 0001 = 65 (A) · Alphabet position = Decimal − 64
+          Reference: 0100 0001 = 65 (A). Decode byte-by-byte; do not reverse the bits.
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export function EncryptionPuzzle({ isSolved, onSolve, onWrongAttempt }: Encrypti
           type="submit"
           className="min-h-[48px] shrink-0 rounded-xl bg-[#C8102E] px-6 py-3 text-sm font-semibold text-white transition-transform duration-150 hover:bg-[#E11D3F] active:scale-[0.98] whitespace-nowrap"
         >
-          {isSolved ? 'Decrypted · HUNT' : 'Decode Transmission'}
+          {isSolved ? 'Decrypted · SHIP' : 'Decode CI Log'}
         </button>
       </form>
     </div>

@@ -15,10 +15,10 @@ interface ExplorerUnit {
 }
 
 const TEAM_MEMBERS: ExplorerUnit[] = [
-  { id: 'amine', name: 'Amine', minutes: 1 },
-  { id: 'sara', name: 'Sara', minutes: 2 },
-  { id: 'youssef', name: 'Youssef', minutes: 5 },
-  { id: 'lina', name: 'Lina', minutes: 10 },
+  { id: 'lint', name: 'Lint Check', minutes: 1 },
+  { id: 'unit-tests', name: 'Unit Tests', minutes: 2 },
+  { id: 'integration-tests', name: 'Integration Tests', minutes: 5 },
+  { id: 'legacy-build', name: 'Legacy Build', minutes: 10 },
 ];
 
 export function BridgeCrossingPuzzle({
@@ -50,7 +50,7 @@ export function BridgeCrossingPuzzle({
   const handleCross = () => {
     if (selectedIds.length === 0) {
       soundEngine.play('error');
-      onWrongAttempt('Select 1 or 2 explorers on the side with the lantern before crossing.');
+      onWrongAttempt('Select one or two jobs on the side with the runner token before deploying.');
       return;
     }
 
@@ -77,7 +77,7 @@ export function BridgeCrossingPuzzle({
       } else {
         soundEngine.play('error');
         onWrongAttempt(
-          `Team crossed in ${nextElapsed} minutes, which exceeds the 17-minute lantern limit. Reset and send the two slowest explorers together!`
+          `The deployment took ${nextElapsed} minutes, over the 17-minute limit. Roll back and rethink how the runner token shuttles between the fast and slow jobs.`
         );
       }
     } else {
@@ -98,10 +98,10 @@ export function BridgeCrossingPuzzle({
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#051029]/70 p-4">
         <div className="space-y-1">
           <p className="text-sm text-slate-200">
-            Move all 4 explorers from West Bank to East Bank in <span className="font-semibold text-[#F5C542]">17 minutes or less</span>.
+            Move all 4 CI jobs from staging to production in <span className="font-semibold text-[#F5C542]">17 minutes or less</span>.
           </p>
           <p className="text-xs text-slate-400">
-            Max 2 per crossing · Group moves at the slower explorer&apos;s pace · Lantern is on the {lanternSide === 'west' ? 'West' : 'East'} Bank
+            Max 2 jobs per crossing · A pair moves at the slower job's pace · Runner token is on the {lanternSide === 'west' ? 'Staging' : 'Production'} side
           </p>
         </div>
         <div className="text-right">
@@ -127,9 +127,9 @@ export function BridgeCrossingPuzzle({
           }`}
         >
           <div className="mb-3 flex items-center justify-between text-xs font-semibold">
-            <span className="text-white">West Bank ({westMembers.length})</span>
+            <span className="text-white">Staging ({westMembers.length})</span>
             <span className={lanternSide === 'west' ? 'text-[#F5C542]' : 'text-slate-500'}>
-              {lanternSide === 'west' ? 'Lantern Here' : 'Waiting'}
+              {lanternSide === 'west' ? 'Runner Token Here' : 'Waiting'}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -156,7 +156,7 @@ export function BridgeCrossingPuzzle({
             })}
             {westMembers.length === 0 && (
               <p className="col-span-2 py-4 text-center text-xs text-slate-400">
-                All explorers crossed West Bank
+                All jobs shipped to production
               </p>
             )}
           </div>
@@ -171,9 +171,9 @@ export function BridgeCrossingPuzzle({
           }`}
         >
           <div className="mb-3 flex items-center justify-between text-xs font-semibold">
-            <span className="text-white">East Bank ({eastMembers.length})</span>
+            <span className="text-white">Production ({eastMembers.length})</span>
             <span className={lanternSide === 'east' ? 'text-[#F5C542]' : 'text-slate-500'}>
-              {lanternSide === 'east' ? 'Lantern Here' : 'Destination'}
+              {lanternSide === 'east' ? 'Runner Token Here' : 'Destination'}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -200,7 +200,7 @@ export function BridgeCrossingPuzzle({
             })}
             {eastMembers.length === 0 && (
               <p className="col-span-2 py-4 text-center text-xs text-slate-400">
-                No explorers on East Bank yet
+                No jobs in production yet
               </p>
             )}
           </div>
@@ -217,13 +217,13 @@ export function BridgeCrossingPuzzle({
         >
           {lanternSide === 'west' ? (
             <>
-              <span>Cross East</span>
+              <span>Deploy jobs</span>
               <ArrowRight className="h-4 w-4" />
             </>
           ) : (
             <>
               <ArrowLeft className="h-4 w-4" />
-              <span>Return West</span>
+              <span>Return runner</span>
             </>
           )}
         </button>

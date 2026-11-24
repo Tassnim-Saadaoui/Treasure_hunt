@@ -11,10 +11,10 @@ interface JoinAdventureViewProps {
 }
 
 const SPECIALTIES: ExplorerProfile['specialty'][] = [
-  'Navigation',
-  'Engineering',
-  'Cryptography',
-  'Strategy',
+  'Frontend',
+  'Backend',
+  'DevOps',
+  'QA / Testing',
 ];
 
 export function JoinAdventureView({
@@ -25,7 +25,7 @@ export function JoinAdventureView({
   const [explorerName, setExplorerName] = useState(existingProfile?.explorerName ?? '');
   const [teamName, setTeamName] = useState(existingProfile?.teamName ?? '');
   const [specialty, setSpecialty] = useState<ExplorerProfile['specialty']>(
-    existingProfile?.specialty ?? 'Engineering'
+    existingProfile?.specialty ?? 'Backend'
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +76,7 @@ export function JoinAdventureView({
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           <div>
             <label htmlFor="explorer-name" className="block text-xs font-semibold text-slate-200">
-              Explorer Name
+              Developer Name
             </label>
             <input
               id="explorer-name"
@@ -90,7 +90,7 @@ export function JoinAdventureView({
 
           <div>
             <label htmlFor="team-name" className="block text-xs font-semibold text-slate-200">
-              Team Name
+              Squad Name
             </label>
             <input
               id="team-name"
@@ -103,7 +103,7 @@ export function JoinAdventureView({
           </div>
 
           <div>
-            <span className="block text-xs font-semibold text-slate-200">Team Specialty</span>
+            <span className="block text-xs font-semibold text-slate-200">Engineering Role</span>
             <div className="mt-2 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
               {SPECIALTIES.map((item) => {
                 const active = specialty === item;

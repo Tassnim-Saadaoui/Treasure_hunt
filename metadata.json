@@ -1,5 +1,5 @@
 {
   "name": "NATEG Treasure Hunt",
-  "description": "Interactive 6-challenge treasure hunt web experience organized by NATEG ISSATSo Student Chapter with modular puzzle routing and Web Audio sound effects.",
+  "description": "A six-stage software engineering treasure hunt with progressive debugging, encoding, scheduling, and systems challenges.",
   "requestFramePermissions": []
 }

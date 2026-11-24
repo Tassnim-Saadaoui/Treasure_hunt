@@ -33,7 +33,7 @@ export function CompassPuzzle({ isSolved, onSolve, onWrongAttempt }: CompassPuzz
     } else {
       soundEngine.play('error');
       onWrongAttempt(
-        `Current needle points to ${selectedDeg}°. Re-read the field bearing: start East (90°) and rotate 45° counter-clockwise.`
+        `Route still points to ${selectedDeg} degrees. Start at East (90) and rotate 45 degrees counter-clockwise to reach the production node.`
       );
     }
   };
@@ -44,7 +44,7 @@ export function CompassPuzzle({ isSolved, onSolve, onWrongAttempt }: CompassPuzz
     <div className="space-y-6">
       <div className="rounded-2xl border border-white/10 bg-[#051029]/70 p-4 sm:p-5">
         <p className="text-sm text-slate-200 leading-relaxed">
-          Field Log: <span className="font-semibold text-[#F5C542]">“Face the rising sun at East (90°), then turn 45° counter-clockwise to align with the ISSATSo Departure Beacon.”</span>
+          Deploy note: <span className="font-semibold text-[#F5C542]">"Packet starts at East (90 degrees). Turn 45 degrees counter-clockwise to reach the North-East production node."</span>
         </p>
       </div>
 

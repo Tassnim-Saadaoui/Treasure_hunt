@@ -60,7 +60,7 @@ export function TreasureVaultView({
           </h1>
           <p className="mt-2 max-w-lg text-sm text-slate-300 leading-relaxed">
             {isUnlocked
-              ? `Congratulations${profile ? `, ${profile.explorerName} (${profile.teamName})` : ''}! Your team solved every riddle, decoded the circuit cipher, and unlocked the final chest.`
+              ? `Congratulations${profile ? `, ${profile.explorerName} (${profile.teamName})` : ''}! Your team debugged the incident, decoded the CI log, shipped the deployment, and passed the production review.`
               : `You have solved ${completedIds.length} of ${CHALLENGES.length} challenges so far. Complete the remaining challenges along the trail to claim the treasure.`}
           </p>
 

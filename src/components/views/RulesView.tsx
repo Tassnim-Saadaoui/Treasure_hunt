@@ -27,7 +27,7 @@ export function RulesView({ soundEnabled, onToggleSound, onNavigate }: RulesView
             Expedition Rules & Guide
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-300 leading-relaxed">
-            Six campus challenges test orientation, mechanical logic, cartography, binary decoding, and strategic coordination. Solve each puzzle to collect Clue Tokens for the final vault.
+            Six software-themed challenges ramp from a quick warm-up to a production-readiness final. Debug the incident, decode the CI log, optimize the deployment, and collect clue tokens for the vault.
           </p>
         </div>
 
@@ -35,19 +35,19 @@ export function RulesView({ soundEnabled, onToggleSound, onNavigate }: RulesView
           <div className="space-y-2">
             <h2 className="font-display text-base font-bold text-[#F5C542]">01. Follow the Trail</h2>
             <p className="text-sm text-slate-300 leading-relaxed">
-              Complete Challenges 1 through 5 in any order, though following the golden trail from The Departure to The Crossing reveals clues naturally.
+              Follow the trail in order for a gradual difficulty ramp: warm-up, fundamentals, debugging, encoding, optimization, then the final systems challenge.
             </p>
           </div>
           <div className="space-y-2">
             <h2 className="font-display text-base font-bold text-[#F5C542]">02. Collect Clue Tokens</h2>
             <p className="text-sm text-slate-300 leading-relaxed">
-              Every solved challenge grants a Clue Token. Challenges 1 to 4 embed the four digits required to turn the golden key in Challenge 6.
+              Every solved challenge grants a clue token. The final vault asks you to trace a request through the stack and read the matching digits in order.
             </p>
           </div>
           <div className="space-y-2">
             <h2 className="font-display text-base font-bold text-[#F5C542]">03. Interactive Audio</h2>
             <p className="text-sm text-slate-300 leading-relaxed">
-              Synthesized Web Audio sound effects respond to compass bearings, gears, cipher inputs, and vault unlocks. Mute or test audio anytime.
+              Synthesized Web Audio adds feedback to routing, gear math, decoding, deployments, and the vault. Mute or test audio anytime.
             </p>
           </div>
         </div>
@@ -101,7 +101,7 @@ export function RulesView({ soundEnabled, onToggleSound, onNavigate }: RulesView
               >
                 <div>
                   <p className="text-xs font-semibold text-[#F5C542]">
-                    {item.numberLabel} · {item.discipline}
+                    {item.numberLabel} · {item.difficulty} · {item.discipline}
                   </p>
                   <p className="mt-0.5 text-sm font-bold text-white">{item.title}</p>
                   <p className="mt-1 text-xs text-slate-400">{item.shortPrompt}</p>

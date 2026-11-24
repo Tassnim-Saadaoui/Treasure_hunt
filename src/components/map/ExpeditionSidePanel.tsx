@@ -160,7 +160,7 @@ export function ExpeditionSidePanel({
                         {challenge.id}. {challenge.title}
                       </p>
                       <p className="truncate text-xs text-slate-400">
-                        {challenge.discipline} · ~{challenge.estimatedMinutes} min
+                        {challenge.difficulty} · ~{challenge.estimatedMinutes} min
                       </p>
                     </div>
                   </div>
