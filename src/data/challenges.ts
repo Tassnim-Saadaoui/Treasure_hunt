@@ -6,7 +6,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     id: 1,
     numberLabel: 'Challenge 1',
     difficulty: 'Warm-up',
-    title: 'The Bug Is in the Bearing',
+    title: 'The Departure',
     discipline: 'Networking',
     shortPrompt: 'Route the release packet from East to the North-East production node.',
     storyBrief:
@@ -24,7 +24,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     id: 2,
     numberLabel: 'Challenge 2',
     difficulty: 'Easy',
-    title: 'The Scheduler Has a Gear Problem',
+    title: 'The Technological Riddle',
     discipline: 'Performance Engineering',
     shortPrompt: 'Predict the direction and rotation count of the build farm output gear.',
     storyBrief:
@@ -42,7 +42,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     id: 3,
     numberLabel: 'Challenge 3',
     difficulty: 'Intermediate',
-    title: '500: Root Cause Not Found',
+    title: 'The Exploration',
     discipline: 'Debugging and Observability',
     shortPrompt: 'Use the incident trace to locate the service returning the mysterious 500.',
     storyBrief:
@@ -60,7 +60,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     id: 4,
     numberLabel: 'Challenge 4',
     difficulty: 'Intermediate',
-    title: 'The CI Log Speaks in Bits',
+    title: 'The Encryption',
     discipline: 'Binary and Encoding',
     shortPrompt: 'Decode four ASCII bytes to find what the release is ready to do.',
     storyBrief:
@@ -78,7 +78,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     id: 5,
     numberLabel: 'Challenge 5',
     difficulty: 'Hard',
-    title: 'Deploy Trainwreck',
+    title: 'The Crossing',
     discipline: 'Scheduling and Optimization',
     shortPrompt: 'Move four CI jobs across a flaky bridge in 17 minutes or less.',
     storyBrief:
@@ -96,7 +96,7 @@ export const CHALLENGES: ChallengeDefinition[] = [
     id: 6,
     numberLabel: 'Challenge 6',
     difficulty: 'Final Boss',
-    title: 'The Production Readiness Review',
+    title: 'The Final Challenge',
     discipline: 'Systems Thinking',
     shortPrompt: 'Trace the request through the stack and assemble the vault code from your clues.',
     storyBrief:
