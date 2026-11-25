@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, Lock, Volume2, VolumeX } from 'lucide-react';
 import { CHALLENGES, getChallengeById } from '../../data/challenges';
 import { soundEngine } from '../../lib/audio/soundEngine';
 import type { ChallengeId } from '../../domain/hunt/types';
@@ -14,10 +14,13 @@ import { GearRiddlePuzzle } from './puzzles/GearRiddlePuzzle';
 interface ChallengeArenaProps {
   challengeId: ChallengeId;
   completedIds: ChallengeId[];
+  maxUnlockedId: ChallengeId;
+  isUnlocked: boolean;
   hintsUsed: number;
   soundEnabled: boolean;
   onToggleSound: () => void;
   onComplete: (id: ChallengeId) => void;
+  onVoyageToMap: (fromId: ChallengeId) => void;
   onRevealHint: (id: ChallengeId) => void;
   onNavigate: (path: string, options?: { silent?: boolean }) => void;
 }
@@ -25,10 +28,13 @@ interface ChallengeArenaProps {
 export function ChallengeArena({
   challengeId,
   completedIds,
+  maxUnlockedId,
+  isUnlocked,
   hintsUsed,
   soundEnabled,
   onToggleSound,
   onComplete,
+  onVoyageToMap,
   onRevealHint,
   onNavigate,
 }: ChallengeArenaProps) {
@@ -37,24 +43,31 @@ export function ChallengeArena({
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(
     null
   );
+  const [isReturningToMap, setIsReturningToMap] = useState(false);
 
   useEffect(() => {
     setFeedback(null);
+    setIsReturningToMap(false);
   }, [challengeId]);
+
+  useEffect(() => {
+    if (!isReturningToMap) return;
+    const timer = window.setTimeout(() => onVoyageToMap(challenge.id), 850);
+    return () => window.clearTimeout(timer);
+  }, [isReturningToMap, challenge.id, onVoyageToMap]);
 
   const handleSolve = () => {
     onComplete(challenge.id);
     setFeedback({
       type: 'success',
-      text: `${challenge.numberLabel} passed. Clue token ${challenge.clueToken} added to your log. The test suite has no further objections.`,
+      text: `${challenge.numberLabel} cleared! Clue token ${challenge.clueToken} added to your log. Returning to the trail...`,
     });
+    setIsReturningToMap(true);
   };
 
   const handleWrongAttempt = (message: string) => {
     setFeedback({ type: 'error', text: message });
   };
-
-  const nextId = challenge.id < CHALLENGES.length ? ((challenge.id + 1) as ChallengeId) : null;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -62,11 +75,11 @@ export function ChallengeArena({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
-          onClick={() => onNavigate('/')}
+          onClick={() => (isSolved ? onVoyageToMap(challenge.id) : onNavigate('/'))}
           className="flex min-h-[44px] items-center gap-2 rounded-xl border border-white/15 bg-[#0A1B42] px-4 py-2 text-xs sm:text-sm font-medium text-slate-200 transition-colors hover:border-white/30 hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Trail</span>
+          <span>Back to Map</span>
         </button>
 
         <div className="flex items-center gap-3">
@@ -74,20 +87,27 @@ export function ChallengeArena({
             {CHALLENGES.map((item) => {
               const active = item.id === challenge.id;
               const done = completedIds.includes(item.id);
+              const stageOpen = item.id <= maxUnlockedId || done;
               return (
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => onNavigate(`/challenges/${item.id}`)}
+                  onClick={() => {
+                    if (stageOpen) onNavigate(`/challenges/${item.id}`);
+                  }}
+                  disabled={!stageOpen}
+                  aria-label={stageOpen ? `Go to Challenge ${item.id}` : `Challenge ${item.id} locked`}
                   className={`flex h-9 w-9 items-center justify-center rounded-lg border text-xs font-bold tabular-nums transition-colors ${
                     active
                       ? 'border-[#F5C542] bg-[#F5C542] text-[#051029]'
                       : done
                         ? 'border-[#F5C542]/40 bg-[#166534]/70 text-[#F5C542]'
-                        : 'border-white/15 bg-[#0A1B42] text-slate-300 hover:border-white/35'
+                        : stageOpen
+                          ? 'border-white/15 bg-[#0A1B42] text-slate-300 hover:border-white/35'
+                          : 'border-white/10 bg-[#071433] text-slate-500'
                   }`}
                 >
-                  {item.id}
+                  {stageOpen ? item.id : <Lock className="h-3.5 w-3.5" />}
                 </button>
               );
             })}
@@ -104,7 +124,27 @@ export function ChallengeArena({
         </div>
       </div>
 
-      {/* Main Challenge Card */}
+      {!isUnlocked ? (
+        <section className="space-y-5 rounded-3xl border border-white/10 bg-[#0A1B42] p-8 text-center shadow-2xl">
+          <Lock className="mx-auto h-8 w-8 text-[#F5C542]" />
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-[#F5C542]">Next stage is still locked</p>
+            <h1 className="font-display text-2xl font-bold text-white">
+              Clear Challenge {maxUnlockedId} to continue
+            </h1>
+            <p className="text-sm text-slate-300">Follow the trail one step at a time.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigate(`/challenges/${maxUnlockedId}`, { silent: true })}
+            className="inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-[#C8102E] px-6 py-3 text-sm font-semibold text-white hover:bg-[#E11D3F]"
+          >
+            <span>Go to Challenge {maxUnlockedId}</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </section>
+      ) : (
+      /* Main Challenge Card */
       <section className="rounded-3xl border border-white/10 bg-[#0A1B42] p-5 sm:p-8 shadow-2xl">
         <div className="flex flex-col gap-5 border-b border-white/10 pb-6 sm:flex-row sm:items-center">
           <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#051029] p-2">
@@ -193,22 +233,12 @@ export function ChallengeArena({
               )}
               <p className="text-sm leading-relaxed">
                 {feedback?.text ??
-                  `Passed. Clue token ${challenge.clueToken} recorded. Production has not caught fire (yet).`}
+                  `Cleared · Clue token ${challenge.clueToken} recorded in your Captain's Log.`}
               </p>
             </div>
 
-            {feedback?.type !== 'error' && (
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.play(nextId ? 'stepUnlock' : 'treasureFanfare');
-                  onNavigate(nextId ? `/challenges/${nextId}` : '/treasure', { silent: true });
-                }}
-                className="flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#F5C542] px-4 py-2 text-xs font-bold text-[#051029] hover:bg-[#FDE047] whitespace-nowrap"
-              >
-                <span>{nextId ? `Next: Challenge ${nextId}` : 'Open Treasure Vault'}</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
+            {feedback?.type === 'success' && (
+              <span className="shrink-0 text-xs font-bold text-emerald-300">Returning to map...</span>
             )}
           </div>
         )}
@@ -245,6 +275,7 @@ export function ChallengeArena({
           )}
         </div>
       </section>
+      )}
     </div>
   );
 }

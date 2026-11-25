@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChallengeArena } from './components/challenges/ChallengeArena';
 import { FooterBanner } from './components/layout/FooterBanner';
 import { TopNavBar } from './components/layout/TopNavBar';
 import { ExpeditionSidePanel } from './components/map/ExpeditionSidePanel';
-import { TreasureTrailMap } from './components/map/TreasureTrailMap';
+import { TreasureTrailMap, type VoyageTransition } from './components/map/TreasureTrailMap';
 import { JoinAdventureView } from './components/views/JoinAdventureView';
 import { RulesView } from './components/views/RulesView';
 import { TreasureVaultView } from './components/views/TreasureVaultView';
@@ -19,6 +20,7 @@ import type { ChallengeId } from './domain/hunt/types';
 
 export default function App() {
   const { route, navigate } = useAppRouter();
+  const [voyageTransition, setVoyageTransition] = useState<VoyageTransition | null>(null);
   const {
     state,
     isHydrated,
@@ -32,10 +34,27 @@ export default function App() {
   } = useTreasureHuntState(huntProgressRepository);
 
   const handleSelectChallenge = (id: ChallengeId) => {
+    setVoyageTransition(null);
     navigate(`/challenges/${id}`);
   };
 
+  const handleVoyageToMap = useCallback((fromId: ChallengeId) => {
+    const toId: ChallengeId | 'treasure' =
+      fromId < 6 ? ((fromId + 1) as ChallengeId) : 'treasure';
+    setVoyageTransition({ fromId, toId });
+    navigate('/', { silent: true });
+  }, [navigate]);
+
+  const handleVoyageArrival = useCallback(() => {
+    setVoyageTransition(null);
+  }, []);
+
+  useEffect(() => {
+    if (route.path !== '/') setVoyageTransition(null);
+  }, [route.path]);
+
   const handlePrimaryTrailCta = () => {
+    setVoyageTransition(null);
     if (isAllCompleted) {
       navigate('/treasure', { silent: true });
       return;
@@ -73,8 +92,11 @@ export default function App() {
                     <TreasureTrailMap
                       completedIds={state.completedIds}
                       nextRecommendedId={nextRecommendedId}
+                      maxUnlockedId={nextRecommendedId}
                       hasProfile={Boolean(state.profile)}
                       isAllCompleted={isAllCompleted}
+                      voyageTransition={voyageTransition}
+                      onVoyageArrival={handleVoyageArrival}
                       onSelectChallenge={handleSelectChallenge}
                       onPrimaryCta={handlePrimaryTrailCta}
                     />
@@ -97,10 +119,16 @@ export default function App() {
                 <ChallengeArena
                   challengeId={route.challengeId}
                   completedIds={state.completedIds}
+                  maxUnlockedId={nextRecommendedId}
+                  isUnlocked={
+                    route.challengeId <= nextRecommendedId ||
+                    state.completedIds.includes(route.challengeId)
+                  }
                   hintsUsed={state.hintsUsedByChallenge[route.challengeId] ?? 0}
                   soundEnabled={state.soundEnabled}
                   onToggleSound={toggleSound}
                   onComplete={completeChallenge}
+                  onVoyageToMap={handleVoyageToMap}
                   onRevealHint={revealHint}
                   onNavigate={navigate}
                 />
