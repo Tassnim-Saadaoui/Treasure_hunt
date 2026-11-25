@@ -1,4 +1,6 @@
-import { Check, Lock, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
+import { Check, Lock, Ship, Sparkles } from 'lucide-react';
 import { CHALLENGES } from '../../data/challenges';
 import { soundEngine } from '../../lib/audio/soundEngine';
 import type { ChallengeId } from '../../domain/hunt/types';
@@ -9,8 +11,46 @@ interface TreasureTrailMapProps {
   nextRecommendedId: ChallengeId;
   maxUnlockedId: ChallengeId;
   isAllCompleted: boolean;
+  voyageTransition: VoyageTransition | null;
+  onVoyageArrival: () => void;
   onSelectChallenge: (id: ChallengeId) => void;
   onPrimaryCta: () => void;
+}
+
+export interface VoyageTransition {
+  fromId: ChallengeId;
+  toId: ChallengeId | 'treasure';
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface TrailSegment {
+  id: ChallengeId;
+  d: string;
+  p0: Point;
+  p1: Point;
+  p2: Point;
+  p3: Point;
+}
+
+const TRAIL_SEGMENTS: TrailSegment[] = [
+  { id: 1, d: 'M 42 11 C 58 14, 72 18, 64 25', p0: { x: 42, y: 11 }, p1: { x: 58, y: 14 }, p2: { x: 72, y: 18 }, p3: { x: 64, y: 25 } },
+  { id: 2, d: 'M 64 25 C 56 32, 32 33, 40 40', p0: { x: 64, y: 25 }, p1: { x: 56, y: 32 }, p2: { x: 32, y: 33 }, p3: { x: 40, y: 40 } },
+  { id: 3, d: 'M 40 40 C 48 47, 72 48, 64 55', p0: { x: 40, y: 40 }, p1: { x: 48, y: 47 }, p2: { x: 72, y: 48 }, p3: { x: 64, y: 55 } },
+  { id: 4, d: 'M 64 55 C 56 62, 32 63, 40 70', p0: { x: 64, y: 55 }, p1: { x: 56, y: 62 }, p2: { x: 32, y: 63 }, p3: { x: 40, y: 70 } },
+  { id: 5, d: 'M 40 70 C 48 77, 72 78, 64 85', p0: { x: 40, y: 70 }, p1: { x: 48, y: 77 }, p2: { x: 72, y: 78 }, p3: { x: 64, y: 85 } },
+  { id: 6, d: 'M 64 85 C 56 91, 48 93, 34 95', p0: { x: 64, y: 85 }, p1: { x: 56, y: 91 }, p2: { x: 48, y: 93 }, p3: { x: 34, y: 95 } },
+];
+
+function evaluateCurve(t: number, segment: TrailSegment): Point {
+  const u = 1 - t;
+  return {
+    x: u ** 3 * segment.p0.x + 3 * u ** 2 * t * segment.p1.x + 3 * u * t ** 2 * segment.p2.x + t ** 3 * segment.p3.x,
+    y: u ** 3 * segment.p0.y + 3 * u ** 2 * t * segment.p1.y + 3 * u * t ** 2 * segment.p2.y + t ** 3 * segment.p3.y,
+  };
 }
 
 export function TreasureTrailMap({
@@ -18,9 +58,49 @@ export function TreasureTrailMap({
   nextRecommendedId,
   maxUnlockedId,
   isAllCompleted,
+  voyageTransition,
+  onVoyageArrival,
   onSelectChallenge,
   onPrimaryCta,
 }: TreasureTrailMapProps) {
+  const [travelPos, setTravelPos] = useState<Point | null>(null);
+
+  useEffect(() => {
+    if (!voyageTransition) {
+      setTravelPos(null);
+      return;
+    }
+
+    const segment = TRAIL_SEGMENTS.find(({ id }) => id === voyageTransition.fromId);
+    if (!segment) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      onVoyageArrival();
+      return;
+    }
+
+    setTravelPos(segment.p0);
+    const duration = 1800;
+    const startedAt = performance.now();
+    let frameId = 0;
+    const animate = (now: number) => {
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = progress < 0.5 ? 4 * progress ** 3 : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      setTravelPos(evaluateCurve(eased, segment));
+      if (progress < 1) {
+        frameId = window.requestAnimationFrame(animate);
+      } else {
+        setTravelPos(null);
+        soundEngine.play(voyageTransition.toId === 'treasure' ? 'treasureFanfare' : 'stepUnlock');
+        onVoyageArrival();
+      }
+    };
+
+    frameId = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [onVoyageArrival, voyageTransition]);
+
   return (
     <section
       aria-label="NATEG Treasure Hunt"
@@ -41,9 +121,9 @@ export function TreasureTrailMap({
       </div>
 
       <div className="relative px-4 pb-8 pt-7 sm:px-8">
-        <svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full">
+        <svg aria-hidden="true" viewBox="0 0 100 110" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full">
           <path
-            d="M 42 6 C 72 13, 70 20, 58 26 C 28 34, 30 42, 43 48 C 72 55, 71 63, 58 69 C 30 77, 34 86, 49 96"
+            d="M 42 11 C 58 14, 72 18, 64 25 C 56 32, 32 33, 40 40 C 48 47, 72 48, 64 55 C 56 62, 32 63, 40 70 C 48 77, 72 78, 64 85 C 56 91, 44 92, 34 95"
             fill="none"
             stroke="#FDE047"
             strokeWidth="1.1"
@@ -51,7 +131,36 @@ export function TreasureTrailMap({
             strokeLinecap="round"
             opacity="0.85"
           />
+          {TRAIL_SEGMENTS.filter((segment) => completedIds.includes(segment.id)).map((segment) => {
+            const isCurrentVoyage = voyageTransition?.fromId === segment.id;
+            return (
+              <motion.path
+                key={segment.id}
+                d={segment.d}
+                fill="none"
+                stroke="#4ADE80"
+                strokeWidth="1.7"
+                strokeDasharray="2 2.3"
+                strokeLinecap="round"
+                initial={isCurrentVoyage ? { pathLength: 0 } : false}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: isCurrentVoyage ? 1.8 : 0.4, ease: 'easeInOut' }}
+              />
+            );
+          })}
         </svg>
+
+        {travelPos && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-1/2"
+            style={{ left: `${travelPos.x}%`, top: `${(travelPos.y / 110) * 100}%` }}
+          >
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400/25 shadow-[0_0_26px_rgba(74,222,128,0.8)]">
+              <Ship className="h-8 w-8 text-emerald-100" />
+            </div>
+          </div>
+        )}
 
         <ol className="relative z-10 space-y-8 sm:space-y-10">
           {CHALLENGES.map((challenge) => {

@@ -7,6 +7,7 @@ interface ChallengeArenaProps {
   maxUnlockedId: ChallengeId;
   isUnlocked: boolean;
   onComplete: (id: ChallengeId) => void;
+  onVoyageToMap: (fromId: ChallengeId) => void;
   onNavigate: (path: string, options?: { silent?: boolean }) => void;
 }
 
@@ -16,14 +17,19 @@ export function ChallengeArena({
   maxUnlockedId,
   isUnlocked,
   onComplete,
+  onVoyageToMap,
   onNavigate,
 }: ChallengeArenaProps) {
   const isSolved = completedIds.includes(challengeId);
   const isFinalChallenge = challengeId === 6;
 
   const handleContinue = () => {
-    if (!isSolved) onComplete(challengeId);
-    onNavigate('/', { silent: true });
+    if (isSolved) {
+      onNavigate('/', { silent: true });
+      return;
+    }
+    onComplete(challengeId);
+    onVoyageToMap(challengeId);
   };
 
   if (!isUnlocked) {

@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChallengeArena } from './components/challenges/ChallengeArena';
 import { TopNavBar } from './components/layout/TopNavBar';
-import { TreasureTrailMap } from './components/map/TreasureTrailMap';
+import { TreasureTrailMap, type VoyageTransition } from './components/map/TreasureTrailMap';
 import { useTreasureHuntState } from './hooks/useTreasureHuntState';
 import { huntProgressRepository } from './infrastructure/persistence/LocalStorageHuntProgressRepository';
 import { useAppRouter } from './lib/router/useAppRouter';
@@ -15,6 +15,7 @@ import type { ChallengeId } from './domain/hunt/types';
 
 export default function App() {
   const { route, navigate } = useAppRouter();
+  const [voyageTransition, setVoyageTransition] = useState<VoyageTransition | null>(null);
   const {
     state,
     isHydrated,
@@ -31,6 +32,15 @@ export default function App() {
     if (isAllCompleted) return;
     navigate(`/challenges/${nextRecommendedId}`, { silent: true });
   }, [isAllCompleted, navigate, nextRecommendedId]);
+
+  const handleVoyageToMap = useCallback((fromId: ChallengeId) => {
+    setVoyageTransition({ fromId, toId: fromId === 6 ? 'treasure' : ((fromId + 1) as ChallengeId) });
+    navigate('/', { silent: true });
+  }, [navigate]);
+
+  const handleVoyageArrival = useCallback(() => {
+    setVoyageTransition(null);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#051029] text-slate-100">
@@ -53,6 +63,8 @@ export default function App() {
                   nextRecommendedId={nextRecommendedId}
                   maxUnlockedId={nextRecommendedId}
                   isAllCompleted={isAllCompleted}
+                  voyageTransition={voyageTransition}
+                  onVoyageArrival={handleVoyageArrival}
                   onSelectChallenge={handleSelectChallenge}
                   onPrimaryCta={handlePrimaryTrailCta}
                 />
@@ -68,6 +80,7 @@ export default function App() {
                     state.completedIds.includes(route.challengeId)
                   }
                   onComplete={completeChallenge}
+                  onVoyageToMap={handleVoyageToMap}
                   onNavigate={navigate}
                 />
               )}
