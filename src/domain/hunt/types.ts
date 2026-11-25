@@ -2,9 +2,6 @@ export type ChallengeId = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type AppRoute =
   | { path: '/'; view: 'home' }
-  | { path: '/join'; view: 'join' }
-  | { path: '/rules'; view: 'rules' }
-  | { path: '/treasure'; view: 'treasure' }
   | { path: `/challenges/${ChallengeId}`; view: 'challenge'; challengeId: ChallengeId };
 
 export type ChallengeStatus = 'locked' | 'active' | 'completed';

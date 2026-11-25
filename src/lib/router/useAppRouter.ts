@@ -5,16 +5,6 @@ import { soundEngine } from '../audio/soundEngine';
 function parsePathname(pathname: string): AppRoute {
   const normalized = pathname.replace(/\/+$/, '') || '/';
 
-  if (normalized === '/join') {
-    return { path: '/join', view: 'join' };
-  }
-  if (normalized === '/rules') {
-    return { path: '/rules', view: 'rules' };
-  }
-  if (normalized === '/treasure') {
-    return { path: '/treasure', view: 'treasure' };
-  }
-
   const challengeMatch = normalized.match(/^\/challenges\/([1-6])$/);
   if (challengeMatch) {
     const id = Number(challengeMatch[1]) as ChallengeId;
