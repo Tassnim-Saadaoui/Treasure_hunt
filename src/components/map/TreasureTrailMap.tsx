@@ -109,18 +109,18 @@ export function TreasureTrailMap({
       <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-24 h-80 w-80 rounded-full bg-[#C8102E]/25 blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-[#C8102E]/25 blur-3xl" />
 
-      <div className="relative z-10 border-b border-white/10 bg-[radial-gradient(circle_at_80%_0%,rgba(225,29,63,0.9),transparent_42%),linear-gradient(145deg,#250523_0%,#09183e_62%,#1e0621_100%)] px-5 pb-8 pt-9 text-center sm:px-8 lg:pb-12 lg:pt-12">
-        <p className="font-display text-sm font-bold tracking-[0.26em] text-[#F5C542] sm:text-lg">NATEG</p>
-        <h1 className="mt-1 font-display text-4xl font-extrabold tracking-wide text-[#F5C542] sm:text-6xl lg:text-6xl xl:text-7xl">
+      <div className="relative z-10 border-b border-white/10 bg-[radial-gradient(circle_at_80%_0%,rgba(225,29,63,0.9),transparent_42%),linear-gradient(145deg,#250523_0%,#09183e_62%,#1e0621_100%)] px-3 pb-3 pt-4 text-center sm:px-8 sm:pb-8 sm:pt-9 lg:pb-12 lg:pt-12">
+        <p className="font-display text-xs font-bold tracking-[0.26em] text-[#F5C542] sm:text-lg">NATEG</p>
+        <h1 className="mt-0.5 font-display text-2xl font-extrabold tracking-wide text-[#F5C542] sm:mt-1 sm:text-5xl lg:text-6xl">
           TREASURE HUNT
         </h1>
-        <p className="mt-3 text-sm font-bold tracking-wide text-white sm:text-base">THE GREAT CHALLENGE STARTS HERE!</p>
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-100 sm:text-base">
+        <p className="mt-1 text-[10px] font-bold tracking-wide text-white sm:mt-3 sm:text-base">THE GREAT CHALLENGE STARTS HERE!</p>
+        <p className="mx-auto mt-2 hidden max-w-sm text-sm leading-relaxed text-slate-100 sm:block sm:text-base">
           Find the clues, solve the puzzles, and reach the final treasure!
         </p>
       </div>
 
-      <div className="relative px-3 pb-7 pt-6 sm:px-8 lg:px-16 lg:pb-14 lg:pt-12 xl:px-24">
+      <div className="relative px-2 pb-3 pt-2 sm:px-8 sm:pb-7 sm:pt-6 lg:px-14 lg:pb-12 lg:pt-10 xl:px-20">
         <svg aria-hidden="true" viewBox="0 0 100 110" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full">
           <defs>
             <filter id="trailGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -169,7 +169,7 @@ export function TreasureTrailMap({
           </div>
         )}
 
-        <ol className="relative z-10 space-y-5 sm:space-y-10 lg:space-y-14 xl:space-y-16">
+        <ol className="relative z-10 space-y-1 sm:space-y-9 lg:space-y-11 xl:space-y-12">
           {CHALLENGES.map((challenge) => {
             const isCompleted = completedIds.includes(challenge.id);
             const isUnlocked = challenge.id <= maxUnlockedId || isCompleted;
@@ -187,19 +187,21 @@ export function TreasureTrailMap({
                     onSelectChallenge(challenge.id);
                   }}
                   aria-label={`Challenge ${challenge.id}${isCompleted ? ', completed' : isUnlocked ? ', ready' : ', locked'}`}
-                  className={`flex max-w-[235px] items-center gap-3 rounded-2xl p-2 text-left transition-transform sm:max-w-[280px] sm:gap-4 sm:p-3 lg:max-w-[420px] lg:gap-7 lg:p-5 xl:max-w-[480px] ${
+                  className={`flex max-w-[180px] items-center gap-1.5 rounded-xl p-1 text-left transition-transform sm:max-w-[280px] sm:gap-4 sm:rounded-2xl sm:p-3 lg:max-w-[380px] lg:gap-6 lg:p-4 xl:max-w-[420px] ${
                     isUnlocked ? 'hover:scale-[1.02] active:scale-[0.98]' : 'cursor-not-allowed opacity-55'
                   } ${isLeft ? 'flex-row' : 'flex-row-reverse text-right'}`}
                 >
-                  <div className="flex min-w-[130px] flex-col items-center text-center sm:min-w-[150px] lg:min-w-[250px] xl:min-w-[300px]">
-                    <ChallengeIcon id={challenge.id} className={`h-16 w-16 sm:h-20 sm:w-20 lg:h-32 lg:w-32 xl:h-40 xl:w-40 ${isUnlocked ? '' : 'grayscale'}`} />
-                    <span className="mt-1.5 text-sm font-semibold text-white sm:mt-2 lg:text-xl xl:text-2xl">Challenge {challenge.id}</span>
-                    <span className="mt-0.5 text-sm font-bold leading-tight text-[#F5C542] sm:text-xs lg:mt-1 lg:text-base xl:text-lg">
-                      {challenge.title}
-                    </span>
+                  <div className="flex min-w-0 w-[116px] flex-row items-center gap-1.5 text-left sm:w-auto sm:min-w-[150px] sm:flex-col sm:gap-0 sm:text-center lg:min-w-[220px] xl:min-w-[250px]">
+                    <ChallengeIcon id={challenge.id} className={`h-8 w-8 shrink-0 sm:mt-1.5 sm:h-20 sm:w-20 lg:h-28 lg:w-28 xl:h-32 xl:w-32 ${isUnlocked ? '' : 'grayscale'}`} />
+                    <div className="flex min-w-0 flex-col sm:items-center">
+                      <span className="text-[11px] font-semibold leading-tight text-white sm:mt-2 sm:text-sm lg:text-lg xl:text-xl">Challenge {challenge.id}</span>
+                      <span className="mt-0.5 text-[9px] font-bold leading-tight text-[#F5C542] sm:text-xs lg:mt-1 lg:text-sm xl:text-base">
+                        {challenge.title}
+                      </span>
+                    </div>
                   </div>
                   <span
-                    className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 text-xl font-bold sm:text-lg lg:h-24 lg:w-24 lg:text-3xl xl:h-28 xl:w-28 xl:text-4xl ${
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold sm:h-14 sm:w-14 sm:text-lg lg:h-20 lg:w-20 lg:text-2xl xl:h-[88px] xl:w-[88px] xl:text-3xl ${
                       isCompleted
                         ? 'border-[#4ADE80] bg-[#16A34A] text-white'
                         : isNext
@@ -207,7 +209,7 @@ export function TreasureTrailMap({
                           : 'border-white/25 bg-[#0B1D47] text-slate-300'
                     }`}
                   >
-                    {isCompleted ? <Check className="h-6 w-6 lg:h-10 lg:w-10 xl:h-12 xl:w-12" strokeWidth={3} /> : isUnlocked ? challenge.id : <Lock className="h-5 w-5 lg:h-8 lg:w-8 xl:h-10 xl:w-10" />}
+                    {isCompleted ? <Check className="h-4 w-4 sm:h-6 sm:w-6 lg:h-8 lg:w-8 xl:h-9 xl:w-9" strokeWidth={3} /> : isUnlocked ? challenge.id : <Lock className="h-3.5 w-3.5 sm:h-5 sm:w-5 lg:h-7 lg:w-7 xl:h-8 xl:w-8" />}
                   </span>
                 </button>
               </li>
@@ -215,8 +217,8 @@ export function TreasureTrailMap({
           })}
         </ol>
 
-        <div className="relative z-10 mt-5 flex flex-col items-center">
-          <TreasureChestIllustration className="h-32 w-40 drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] sm:h-36 sm:w-44 lg:h-44 lg:w-52 xl:h-52 xl:w-60" />
+        <div className="relative z-10 mt-2 flex flex-col items-center sm:mt-5">
+          <TreasureChestIllustration className="h-12 w-16 drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] sm:h-36 sm:w-44 lg:h-40 lg:w-48 xl:h-44 xl:w-52" />
           <button
             type="button"
             disabled={isAllCompleted}
@@ -224,7 +226,7 @@ export function TreasureTrailMap({
               soundEngine.play('stepUnlock');
               onPrimaryCta();
             }}
-            className="mt-2 flex min-h-[58px] w-full max-w-sm items-center justify-center gap-2 rounded-full bg-[#C8102E] px-8 py-4 text-base font-bold tracking-wide text-white shadow-[0_10px_28px_rgba(200,16,46,0.45)] transition-transform hover:bg-[#E11D3F] active:scale-[0.98] disabled:cursor-default disabled:bg-emerald-700 disabled:shadow-none"
+            className="mt-1 flex min-h-[42px] w-full max-w-[240px] items-center justify-center gap-2 rounded-full bg-[#C8102E] px-4 py-2 text-xs font-bold tracking-wide text-white shadow-[0_10px_28px_rgba(200,16,46,0.45)] transition-transform hover:bg-[#E11D3F] active:scale-[0.98] disabled:cursor-default disabled:bg-emerald-700 disabled:shadow-none sm:mt-2 sm:min-h-[58px] sm:max-w-sm sm:px-8 sm:py-4 sm:text-base"
           >
             {isAllCompleted && <Sparkles className="h-4 w-4" />}
             {isAllCompleted ? 'HUNT COMPLETE' : completedIds.length ? `CONTINUE CHALLENGE ${nextRecommendedId}` : 'JOIN THE ADVENTURE'}

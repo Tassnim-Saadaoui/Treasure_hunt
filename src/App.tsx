@@ -46,8 +46,8 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-[#051029] text-slate-100">
       <TopNavBar />
 
-      <main className="flex-1 px-3 py-4 sm:px-6 sm:py-8 lg:px-10">
-        <div className="mx-auto w-full max-w-[1600px]">
+      <main className="flex-1 px-2 py-2 sm:px-6 sm:py-8 lg:px-10">
+        <div className="mx-auto w-full max-w-[1200px]">
           {isHydrated ? (
             <AnimatePresence mode="wait">
               <motion.div
