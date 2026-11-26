@@ -5,13 +5,14 @@
 
 import { useCallback, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChallengeArena } from './components/challenges/ChallengeArena';
 import { TopNavBar } from './components/layout/TopNavBar';
-import { TreasureTrailMap, type VoyageTransition } from './components/map/TreasureTrailMap';
 import { useTreasureHuntState } from './hooks/useTreasureHuntState';
 import { huntProgressRepository } from './infrastructure/persistence/LocalStorageHuntProgressRepository';
 import { useAppRouter } from './lib/router/useAppRouter';
 import type { ChallengeId } from './domain/hunt/types';
+import { HomePage } from './pages/home/page';
+import { ChallengePages } from './pages/challenges/page';
+import type { VoyageTransition } from './pages/home/components/TreasureTrailMap';
 
 export default function App() {
   const { route, navigate } = useAppRouter();
@@ -58,7 +59,7 @@ export default function App() {
                 transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
               >
               {route.view === 'home' && (
-                <TreasureTrailMap
+                <HomePage
                   completedIds={state.completedIds}
                   nextRecommendedId={nextRecommendedId}
                   maxUnlockedId={nextRecommendedId}
@@ -71,17 +72,15 @@ export default function App() {
               )}
 
               {route.view === 'challenge' && (
-                <ChallengeArena
+                <ChallengePages
                   challengeId={route.challengeId}
                   completedIds={state.completedIds}
-                  maxUnlockedId={nextRecommendedId}
                   isUnlocked={
                     route.challengeId <= nextRecommendedId ||
                     state.completedIds.includes(route.challengeId)
                   }
                   onComplete={completeChallenge}
                   onVoyageToMap={handleVoyageToMap}
-                  onNavigate={navigate}
                 />
               )}
               </motion.div>

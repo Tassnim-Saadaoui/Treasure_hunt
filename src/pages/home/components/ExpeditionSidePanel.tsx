@@ -1,7 +1,7 @@
 import { ArrowRight, CheckCircle2, Circle, Volume2, VolumeX } from 'lucide-react';
-import { CHALLENGES } from '../../data/challenges';
-import { soundEngine } from '../../lib/audio/soundEngine';
-import type { ChallengeId, ExplorerProfile } from '../../domain/hunt/types';
+import { CHALLENGES } from '../../../data/challenges';
+import { soundEngine } from '../../../lib/audio/soundEngine';
+import type { ChallengeId, ExplorerProfile } from '../../../domain/hunt/types';
 
 interface ExpeditionSidePanelProps {
   profile: ExplorerProfile | null;

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Check, Lock, Ship, Sparkles } from 'lucide-react';
-import { CHALLENGES } from '../../data/challenges';
-import { soundEngine } from '../../lib/audio/soundEngine';
-import type { ChallengeId } from '../../domain/hunt/types';
-import { ChallengeIcon, TreasureChestIllustration } from '../artwork/ChallengeArtwork';
+import { CHALLENGES } from '../../../data/challenges';
+import { soundEngine } from '../../../lib/audio/soundEngine';
+import type { ChallengeId } from '../../../domain/hunt/types';
+import { ChallengeIcon, TreasureChestIllustration } from '../../../components/artwork/ChallengeArtwork';
 
 interface TreasureTrailMapProps {
   completedIds: ChallengeId[];

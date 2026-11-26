@@ -3,7 +3,7 @@ import { CHALLENGES } from '../../data/challenges';
 import { areAllChallengesCompleted } from '../../domain/hunt/progress';
 import { soundEngine } from '../../lib/audio/soundEngine';
 import type { ChallengeId, ExplorerProfile } from '../../domain/hunt/types';
-import { TreasureChestIllustration } from '../artwork/ChallengeArtwork';
+import { TreasureChestIllustration } from '../../components/artwork/ChallengeArtwork';
 
 interface TreasureVaultViewProps {
   profile: ExplorerProfile | null;

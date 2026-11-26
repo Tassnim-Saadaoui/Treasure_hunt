@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { soundEngine } from '../../../lib/audio/soundEngine';
+import { soundEngine } from '../../../../lib/audio/soundEngine';
 
 interface CompassPuzzleProps {
   isSolved: boolean;

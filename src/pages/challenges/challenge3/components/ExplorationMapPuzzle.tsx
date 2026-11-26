@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Compass, MapPin } from 'lucide-react';
-import { soundEngine } from '../../../lib/audio/soundEngine';
+import { soundEngine } from '../../../../lib/audio/soundEngine';
 
 interface ExplorationMapPuzzleProps {
   isSolved: boolean;

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { soundEngine } from '../../../lib/audio/soundEngine';
+import { soundEngine } from '../../../../lib/audio/soundEngine';
 
 interface EncryptionPuzzleProps {
   isSolved: boolean;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
-import { soundEngine } from '../../../lib/audio/soundEngine';
+import { soundEngine } from '../../../../lib/audio/soundEngine';
 
 interface BridgeCrossingPuzzleProps {
   isSolved: boolean;

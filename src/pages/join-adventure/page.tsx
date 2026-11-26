@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { soundEngine } from '../../lib/audio/soundEngine';
 import type { ExplorerProfile } from '../../domain/hunt/types';
-import { CompassIllustration } from '../artwork/ChallengeArtwork';
+import { CompassIllustration } from '../../components/artwork/ChallengeArtwork';
 
 interface JoinAdventureViewProps {
   existingProfile: ExplorerProfile | null;
