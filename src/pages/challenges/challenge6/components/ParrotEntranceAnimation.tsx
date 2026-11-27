@@ -1,301 +1,281 @@
 /**
  * ParrotEntranceAnimation – Challenge 6
  *
- * Animation d'introduction : le perroquet (GIF fourni) entre depuis le bas-gauche,
- * survole l'écran en diagonale avec un banking 3D, accélère et sort par le coin
- * supérieur-droit. Des plumes SVG colorées et des traînées lumineuses suivent le
- * sillage. L'overlay s'efface, puis `onDone` est appelé.
+ * Trois frames de vol réelles :
+ *   closed → piroquetsansbg.png  (perroquet posé avec la carte)
+ *   up     → parrot_wings_up     (ailes levées)
+ *   down   → parrot_wings_down   (ailes déployées / baissées)
  *
- * prefers-reduced-motion : simple fade statique (~520 ms) sans déplacement.
- * Fallback timer : onDone se déclenche même si onAnimationComplete ne tire pas.
+ * Les JPG (up/down) ont un fond blanc : removeWhiteBackgroundFromEdges() les
+ * traite par flood-fill canvas avant de les afficher.
+ * Le PNG closed est déjà transparent.
+ *
+ * Séquence : closed → up → down → up → down … (accélère légèrement)
+ * La frame active est commutée par des setTimeout calés sur WING_SEQUENCE.
+ * Un liftOffset CSS synchronise corps et gravité à chaque battement.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import parrotGif from '../puzzle/User attachment.gif';
+import parrotClosedRaw from '../puzzle/Gemini_Generated_Image_r25m58r25m58r25m-removebg-preview_057ac7c0 (1).png';
+import parrotWingsUpRaw   from '../puzzle/parrot_wings_up_1795783109658.jpg';
+import parrotWingsDownRaw from '../puzzle/parrot_wings_down_1795783111213.jpg';
+import { removeWhiteBackgroundFromEdges } from '../../../../utils/transparentSprite';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type WingFrame = 'up' | 'down' | 'closed';
+
+interface WingStep { atMs: number; frame: WingFrame; }
+
+// Séquence : départ posé, puis battements s'accélérant légèrement
+const WING_SEQUENCE: WingStep[] = [
+  { atMs:    0, frame: 'closed' },
+  { atMs:  180, frame: 'up'     },
+  { atMs:  360, frame: 'down'   },
+  { atMs:  530, frame: 'up'     },
+  { atMs:  695, frame: 'down'   },
+  { atMs:  850, frame: 'up'     },
+  { atMs: 1000, frame: 'down'   },
+  { atMs: 1145, frame: 'up'     },
+  { atMs: 1285, frame: 'down'   },
+  { atMs: 1420, frame: 'up'     },
+  { atMs: 1550, frame: 'down'   },
+  { atMs: 1675, frame: 'up'     },
+];
+
+// ─── Plumes SVG ───────────────────────────────────────────────────────────────
+
+const FEATHERS = [
+  { id: 1, color: '#D93829', accent: '#9E1F14', delay: 0.28, startX: -75, startY:  42, driftX: -120, driftY: 85, rotateStart: -20, rotateEnd: -115, scale: 0.95 },
+  { id: 2, color: '#F2B705', accent: '#C48A00', delay: 0.48, startX: -18, startY:  14, driftX: -105, driftY: 92, rotateStart:  12, rotateEnd:  118, scale: 0.85 },
+  { id: 3, color: '#1D6FA5', accent: '#0F476E', delay: 0.68, startX:  40, startY: -24, driftX: -112, driftY: 84, rotateStart: -32, rotateEnd: -138, scale: 0.88 },
+  { id: 4, color: '#D93829', accent: '#9E1F14', delay: 0.92, startX: 112, startY: -78, driftX:  -95, driftY: 78, rotateStart:  15, rotateEnd:  -88, scale: 0.78 },
+];
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface ParrotEntranceAnimationProps {
-  /** Appelé dès que l'animation est terminée et que le puzzle peut apparaître. */
   onDone: () => void;
-  /** Durée totale du vol en secondes (défaut : 1.8 s). */
   durationSeconds?: number;
 }
-
-// ─── Plumes SVG dans le sillage ──────────────────────────────────────────────
-
-interface FeatherParticle {
-  id: number;
-  /** Couleur de remplissage principale */
-  color: string;
-  /** Couleur de la nervure centrale */
-  accent: string;
-  delay: number;
-  startX: number;
-  startY: number;
-  driftX: number;
-  driftY: number;
-  rotateStart: number;
-  rotateEnd: number;
-  scale: number;
-}
-
-const FEATHER_PARTICLES: FeatherParticle[] = [
-  {
-    id: 1,
-    color: '#D93829',
-    accent: '#9E1F14',
-    delay: 0.35,
-    startX: -60,
-    startY: 36,
-    driftX: -120,
-    driftY: 85,
-    rotateStart: -20,
-    rotateEnd: -105,
-    scale: 0.95,
-  },
-  {
-    id: 2,
-    color: '#F2B705',
-    accent: '#C48A00',
-    delay: 0.54,
-    startX: -10,
-    startY: 8,
-    driftX: -105,
-    driftY: 95,
-    rotateStart: 12,
-    rotateEnd: 115,
-    scale: 0.85,
-  },
-  {
-    id: 3,
-    color: '#1D6FA5',
-    accent: '#0F476E',
-    delay: 0.72,
-    startX: 48,
-    startY: -34,
-    driftX: -110,
-    driftY: 85,
-    rotateStart: -32,
-    rotateEnd: -135,
-    scale: 0.9,
-  },
-  {
-    id: 4,
-    color: '#D93829',
-    accent: '#9E1F14',
-    delay: 0.92,
-    startX: 118,
-    startY: -88,
-    driftX: -95,
-    driftY: 80,
-    rotateStart: 15,
-    rotateEnd: -85,
-    scale: 0.78,
-  },
-];
 
 // ─── Composant ────────────────────────────────────────────────────────────────
 
 export function ParrotEntranceAnimation({
   onDone,
-  durationSeconds = 1.8,
+  durationSeconds = 2.0,
 }: ParrotEntranceAnimationProps) {
-  const prefersReducedMotion = useReducedMotion();
-  const completedRef = useRef(false);
+  const reduced     = useReducedMotion();
+  const doneRef     = useRef(false);
 
-  /** Garantit que onDone n'est appelé qu'une seule fois. */
+  // Sprites après suppression du fond blanc
+  const [sprites, setSprites] = useState<{ up: string; down: string; closed: string } | null>(null);
+  const [activeFrame, setActiveFrame] = useState<WingFrame>('closed');
+
   const finishOnce = () => {
-    if (completedRef.current) return;
-    completedRef.current = true;
+    if (doneRef.current) return;
+    doneRef.current = true;
     onDone();
   };
 
-  // Fallback : si onAnimationComplete ne tire pas (SSR, erreur…), on force la fin.
+  // ── Chargement + suppression fond blanc des JPG ──────────────────────────
   useEffect(() => {
-    const delay = prefersReducedMotion ? 520 : Math.round(durationSeconds * 1000) + 350;
-    const id = window.setTimeout(finishOnce, delay);
+    let cancelled = false;
+    Promise.all([
+      removeWhiteBackgroundFromEdges(parrotWingsUpRaw,   640),
+      removeWhiteBackgroundFromEdges(parrotWingsDownRaw, 640),
+      Promise.resolve(parrotClosedRaw), // PNG déjà transparent
+    ]).then(([up, down, closed]) => {
+      if (!cancelled) setSprites({ up, down, closed });
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // ── Séquence de battements d'ailes ──────────────────────────────────────
+  useEffect(() => {
+    if (!sprites || reduced) return;
+    const ratio = durationSeconds / 1.85;
+    const timers = WING_SEQUENCE.map((step) =>
+      window.setTimeout(
+        () => setActiveFrame(step.frame),
+        Math.round(step.atMs * ratio)
+      )
+    );
+    return () => timers.forEach(window.clearTimeout);
+  }, [sprites, reduced, durationSeconds]);
+
+  // ── Fallback timer ───────────────────────────────────────────────────────
+  useEffect(() => {
+    const ms = reduced ? 520 : Math.round(durationSeconds * 1000) + 500;
+    const id = window.setTimeout(finishOnce, ms);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [durationSeconds, prefersReducedMotion]);
+  }, [durationSeconds, reduced]);
 
-  // ── Reduced-motion : fade statique ────────────────────────────────────────
+  // ── Portance synchronisée avec le battement ──────────────────────────────
+  const liftTransform =
+    activeFrame === 'down' ? 'translate3d(0,-6px,0) rotate(-1.5deg)' :
+    activeFrame === 'up'   ? 'translate3d(0, 5px,0) rotate( 1.0deg)' :
+                             'translate3d(0, 0px,0) rotate( 0.0deg)';
 
-  if (prefersReducedMotion) {
+  // ── Reduced-motion ───────────────────────────────────────────────────────
+  if (reduced) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b1820]/85 px-6"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#07132E]"
         role="status"
-        aria-live="polite"
-        aria-label="Ouverture du challenge Puzzle"
+        aria-label="Ouverture du challenge"
       >
-        <motion.div
+        <motion.img
+          src={parrotClosedRaw}
+          alt="Perroquet tenant la carte au trésor"
+          draggable={false}
+          className="w-48 sm:w-64 h-auto select-none drop-shadow-[0_14px_24px_rgba(0,0,0,0.6)]"
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 1, 0] }}
-          transition={{ duration: 0.5, times: [0, 0.45, 1], ease: 'easeInOut' }}
-          className="flex flex-col items-center gap-3"
-        >
-          <img
-            src={parrotGif}
-            alt="Perroquet tenant la carte au trésor"
-            className="w-44 sm:w-56 h-auto select-none drop-shadow-[0_14px_24px_rgba(0,0,0,0.45)]"
-            draggable={false}
-          />
-        </motion.div>
+          animate={{ opacity: [0, 1, 1, 0] }}
+          transition={{ duration: 0.55, times: [0, 0.2, 0.75, 1] }}
+        />
       </div>
     );
   }
 
-  // ── Animation complète ────────────────────────────────────────────────────
-
+  // ── Animation complète ───────────────────────────────────────────────────
   return (
     <div
       className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center select-none"
       style={{ perspective: '1000px' }}
       role="status"
-      aria-live="polite"
-      aria-label="Le perroquet apporte la carte au trésor"
+      aria-label="Le perroquet s'envole avec la carte au trésor"
     >
-      {/* Voile atmosphérique cohérent avec la palette maritime Treasure Hunt */}
+      {/* Fond maritime sombre */}
       <motion.div
         aria-hidden="true"
-        initial={{ opacity: 0.9 }}
-        animate={{ opacity: [0.9, 0.82, 0.65, 0] }}
-        transition={{
-          duration: durationSeconds,
-          times: [0, 0.4, 0.78, 1],
-          ease: 'easeOut',
-        }}
-        className="absolute inset-0 bg-[radial-gradient(circle_at_45%_55%,rgba(28,58,74,0.72)_0%,rgba(10,22,30,0.92)_70%)] backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[#07132E]"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: [1, 0.95, 0.75, 0] }}
+        transition={{ duration: durationSeconds, times: [0, 0.35, 0.78, 1], ease: 'easeOut' }}
       />
 
-      {/* Traînées lumineuses + plumes SVG dans le sillage */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-      >
-        {/* Traînées d'air */}
+      {/* Traînées + plumes (affichées dès le montage, indépendant du chargement sprites) */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
         {[
-          { delay: 0.42, xOffset: -30, yOffset: 26,  width: 170, opacity: 0.38 },
-          { delay: 0.64, xOffset:  35, yOffset: -20, width: 220, opacity: 0.48 },
-          { delay: 0.88, xOffset: 105, yOffset: -72, width: 190, opacity: 0.4  },
-        ].map((streak, index) => (
+          { delay: 0.36, xo: -36, yo:  28, w: 170, op: 0.36 },
+          { delay: 0.62, xo:  30, yo: -18, w: 215, op: 0.45 },
+          { delay: 0.88, xo:  98, yo: -68, w: 190, op: 0.38 },
+        ].map((s, i) => (
           <motion.div
-            key={index}
-            initial={{ opacity: 0, x: streak.xOffset + 30, y: streak.yOffset - 30, scaleX: 0.35 }}
-            animate={{
-              opacity:  [0, streak.opacity, 0],
-              x:        [streak.xOffset + 20, streak.xOffset - 85,  streak.xOffset - 200],
-              y:        [streak.yOffset - 20, streak.yOffset + 85,  streak.yOffset + 200],
-              scaleX:   [0.35, 1.15, 0.55],
-            }}
-            transition={{
-              duration: 0.78,
-              delay: streak.delay,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            style={{ width: streak.width }}
+            key={i}
+            style={{ width: s.w }}
             className="absolute h-[2.5px] -rotate-45 rounded-full bg-gradient-to-r from-transparent via-[#f3d48c]/75 to-transparent"
+            initial={{ opacity: 0, x: s.xo + 30, y: s.yo - 30, scaleX: 0.35 }}
+            animate={{
+              opacity: [0, s.op, 0],
+              x: [s.xo + 20, s.xo - 85, s.xo - 200],
+              y: [s.yo - 20, s.yo + 85, s.yo + 200],
+              scaleX: [0.35, 1.15, 0.55],
+            }}
+            transition={{ duration: 0.78, delay: s.delay, ease: [0.22, 1, 0.36, 1] }}
           />
         ))}
 
-        {/* Plumes SVG */}
-        {FEATHER_PARTICLES.map((feather) => (
+        {FEATHERS.map((f) => (
           <motion.svg
-            key={feather.id}
+            key={f.id}
             viewBox="0 0 32 16"
             className="absolute w-7 h-4 overflow-visible"
-            initial={{
-              opacity: 0,
-              x: feather.startX,
-              y: feather.startY,
-              rotate: feather.rotateStart,
-              scale: feather.scale * 0.65,
-            }}
+            initial={{ opacity: 0, x: f.startX, y: f.startY, rotate: f.rotateStart, scale: f.scale * 0.65 }}
             animate={{
-              opacity: [0, 0.9, 0.78, 0],
-              x: [
-                feather.startX,
-                feather.startX + feather.driftX * 0.55,
-                feather.startX + feather.driftX,
-              ],
-              y: [
-                feather.startY,
-                feather.startY + feather.driftY * 0.45,
-                feather.startY + feather.driftY,
-              ],
-              rotate: [feather.rotateStart, feather.rotateStart + 30, feather.rotateEnd],
-              scale:  [feather.scale * 0.65, feather.scale, feather.scale * 0.85],
+              opacity: [0, 0.9, 0.75, 0],
+              x: [f.startX, f.startX + f.driftX * 0.55, f.startX + f.driftX],
+              y: [f.startY, f.startY + f.driftY * 0.45, f.startY + f.driftY],
+              rotate: [f.rotateStart, f.rotateStart + 30, f.rotateEnd],
+              scale: [f.scale * 0.65, f.scale, f.scale * 0.85],
             }}
-            transition={{
-              duration: 0.95,
-              delay: feather.delay,
-              ease: 'easeOut',
-            }}
+            transition={{ duration: 0.92, delay: f.delay, ease: 'easeOut' }}
           >
-            <path d="M2 9 C10 2, 22 2, 30 7 C22 12, 11 13, 2 9 Z" fill={feather.color} />
-            <path
-              d="M3 9 C12 7, 21 7, 29 7"
-              stroke={feather.accent}
-              strokeWidth="1.2"
-              fill="none"
-              strokeLinecap="round"
-            />
+            <path d="M2 9 C10 2, 22 2, 30 7 C22 12, 11 13, 2 9 Z" fill={f.color} />
+            <path d="M3 9 C12 7, 21 7, 29 7" stroke={f.accent} strokeWidth="1.2" fill="none" strokeLinecap="round" />
           </motion.svg>
         ))}
       </div>
 
-      {/* Perroquet — trajectoire parabolique avec banking 3D et accélération */}
-      <motion.div
-        initial={{
-          x: '-34vw',
-          y: '28vh',
-          scale: 0.8,
-          rotate: -10,
-          rotateY: 16,
-          opacity: 0,
-        }}
-        animate={{
-          x:       ['-34vw', '-8vw',  '4vw',  '28vw',  '62vw',  '98vw'],
-          y:       ['28vh',  '4vh',   '-2vh', '-22vh', '-54vh', '-92vh'],
-          scale:   [0.8,     1.04,    1.06,   0.98,    0.84,    0.68],
-          rotate:  [-10,     -2,      3,      -12,     -20,     -25],
-          rotateY: [16,      4,       -6,     -16,     -24,     -30],
-          opacity: [0,       1,       1,      1,       1,       0],
-        }}
-        transition={{
-          duration: durationSeconds,
-          times: [0, 0.24, 0.44, 0.66, 0.85, 1],
-          ease: 'easeInOut',
-        }}
-        onAnimationComplete={finishOnce}
-        className="relative flex items-center justify-center will-change-transform"
-        style={{ transformStyle: 'preserve-3d' }}
-      >
-        {/* Halo lumineux derrière le perroquet */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-8 rounded-full bg-[radial-gradient(circle,rgba(242,183,5,0.22)_0%,rgba(217,56,41,0.1)_48%,transparent_72%)] blur-xl"
-        />
+      {/* Perroquet — trajectoire diagonale. Rendu seulement quand sprites prêts. */}
+      {sprites && (
+        <motion.div
+          className="relative flex items-center justify-center will-change-transform"
+          initial={{ x: '-28vw', y: '22vh', scale: 0.84, rotate: -4, opacity: 0 }}
+          animate={{
+            x:       ['-28vw', '-6vw',  '16vw',  '54vw', '104vw'],
+            y:       [ '22vh',  '4vh', '-12vh', '-42vh',  '-88vh'],
+            scale:   [   0.84,   1.05,    1.02,    0.88,    0.72],
+            rotate:  [     -4,     -8,     -13,     -19,     -24],
+            opacity: [      0,      1,       1,       1,       0],
+          }}
+          transition={{
+            duration: durationSeconds,
+            times: [0, 0.28, 0.56, 0.82, 1],
+            ease: 'easeInOut',
+          }}
+          onAnimationComplete={finishOnce}
+        >
+          {/* Halo */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-8 rounded-full blur-xl bg-[radial-gradient(circle,rgba(242,183,5,0.22)_0%,rgba(217,56,41,0.1)_48%,transparent_72%)]"
+          />
 
-        <img
-          src={parrotGif}
-          alt="Perroquet rouge, bleu et jaune tenant la carte au trésor"
-          draggable={false}
-          className="relative w-56 sm:w-72 md:w-80 lg:w-96 h-auto object-contain drop-shadow-[0_26px_34px_rgba(0,0,0,0.55)]"
-        />
-      </motion.div>
+          {/* Conteneur des 3 frames — transition CSS douce entre frames */}
+          <div
+            className="relative w-64 sm:w-80 md:w-96 lg:w-[420px] aspect-square will-change-transform"
+            style={{
+              transform: liftTransform,
+              transition: 'transform 140ms ease-in-out',
+            }}
+          >
+            {/* Frame : closed (PNG transparent, perroquet avec carte) */}
+            <img
+              src={sprites.closed}
+              alt={activeFrame === 'closed' ? 'Perroquet rouge, bleu et jaune tenant la carte au trésor' : ''}
+              aria-hidden={activeFrame !== 'closed'}
+              draggable={false}
+              className={`absolute inset-0 w-full h-full object-contain drop-shadow-[0_24px_30px_rgba(0,0,0,0.52)] transition-opacity duration-[120ms] ${
+                activeFrame === 'closed' ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+
+            {/* Frame : ailes levées (JPG, fond supprimé) */}
+            <img
+              src={sprites.up}
+              alt={activeFrame === 'up' ? 'Perroquet ailes levées' : ''}
+              aria-hidden={activeFrame !== 'up'}
+              draggable={false}
+              className={`absolute inset-0 w-full h-full object-contain drop-shadow-[0_24px_30px_rgba(0,0,0,0.52)] transition-opacity duration-[120ms] ${
+                activeFrame === 'up' ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+
+            {/* Frame : ailes baissées (JPG, fond supprimé) */}
+            <img
+              src={sprites.down}
+              alt={activeFrame === 'down' ? 'Perroquet ailes baissées' : ''}
+              aria-hidden={activeFrame !== 'down'}
+              draggable={false}
+              className={`absolute inset-0 w-full h-full object-contain drop-shadow-[0_24px_30px_rgba(0,0,0,0.52)] transition-opacity duration-[120ms] ${
+                activeFrame === 'down' ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          </div>
+        </motion.div>
+      )}
 
       {/* Légende */}
       <motion.p
         aria-hidden="true"
-        className="absolute bottom-[14%] left-1/2 -translate-x-1/2 whitespace-nowrap font-display text-base font-bold text-[#F5C542] drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] sm:text-lg"
+        className="absolute bottom-[13%] left-1/2 -translate-x-1/2 whitespace-nowrap font-display text-base font-bold text-[#F5C542] drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] sm:text-lg"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: [0, 1, 1, 0], y: [6, 0, 0, -4] }}
-        transition={{
-          duration: durationSeconds * 0.9,
-          delay: 0.2,
-          times: [0, 0.18, 0.72, 1],
-        }}
+        transition={{ duration: durationSeconds * 0.88, delay: 0.22, times: [0, 0.18, 0.70, 1] }}
       >
         Gérard s'enfuit avec la carte… 🦜
       </motion.p>
