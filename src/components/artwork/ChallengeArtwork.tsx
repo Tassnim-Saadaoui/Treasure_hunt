@@ -1,5 +1,5 @@
 import type { ChallengeId } from '../../domain/hunt/types';
-import { AlertTriangle, Building2, BotMessageSquare, Compass, Drum, MapPinned, Plane } from 'lucide-react';
+import { AlertTriangle, Building2, BotMessageSquare, Drone, Drum, Fingerprint, Map, MapPinned } from 'lucide-react';
 
 interface ArtworkProps {
   className?: string;
@@ -213,19 +213,20 @@ export function TreasureChestIllustration({ className = 'w-32 h-32' }: ArtworkPr
 export function ChallengeIcon({ id, className }: { id: ChallengeId; className?: string }) {
   const cls = className ?? 'h-16 w-16';
   switch (id) {
+    // Challenge 1 — L'Empreinte du Suspect : QR code / empreinte
     case 1:
-      return <CompassIllustration className={cls} />;
+      return <Fingerprint className={cls} strokeWidth={1.5} />;
 
-    // Challenge 2 — Drone de livraison : Plane + AlertTriangle badge
+    // Challenge 2 — Drone de livraison
     case 2:
       return (
         <span className={`relative inline-flex shrink-0 items-center justify-center ${cls}`} aria-hidden="true">
-          <Plane className="h-[82%] w-[82%] rotate-[-18deg] text-[#00aaff]" strokeWidth={1.6} />
+          <Drone className="h-[82%] w-[82%] text-[#00aaff]" strokeWidth={1.5} />
           <AlertTriangle className="absolute bottom-0 right-0 h-[38%] w-[38%] rounded-full bg-[#061433] p-[2px] text-orange-400" strokeWidth={2.5} />
         </span>
       );
 
-    // Challenge 3 — Paradoxe des Trois Serveurs : chatbot / IA
+    // Challenge 3 — Paradoxe des Trois Serveurs
     case 3:
       return (
         <span className={`relative inline-flex shrink-0 items-center justify-center ${cls}`} aria-hidden="true">
@@ -234,16 +235,27 @@ export function ChallengeIcon({ id, className }: { id: ChallengeId; className?: 
       );
 
     case 4:
-      return <Building2 className={`${cls} text-[#00B8FF]`} strokeWidth={1.5} />;
+      return <Building2 className={cls} strokeWidth={1.5} />;
 
-    // Challenge 5 — Rythme en Studio : Drum icon (unchanged, already correct)
+    // Challenge 5 — Rythme en Studio
     case 5:
-      return <Drum className={`${cls} text-[#F5C542]`} strokeWidth={1.5} />;
+      return <Drum className={cls} strokeWidth={1.5} />;
 
     case 6:
       return (
         <span className={`relative inline-flex shrink-0 items-center justify-center ${cls}`} aria-hidden="true">
-          <Compass className="h-[82%] w-[82%] text-[#00B8FF]" strokeWidth={1.5} />
+          <Map className="h-full w-full" strokeWidth={1.5} />
+          <MapPinned
+            className="absolute -bottom-1 -right-1 h-[45%] w-[45%] rounded-full bg-[#061433] p-[1.5px] text-[#F22555]"
+            strokeWidth={2}
+          />
+        </span>
+      );
+
+    case 6:
+      return (
+        <span className={`relative inline-flex shrink-0 items-center justify-center ${cls}`} aria-hidden="true">
+          <Map className="h-full w-full" strokeWidth={1.5} />
           <MapPinned className="absolute bottom-[2%] right-[1%] h-[42%] w-[42%] rounded-full bg-[#061433] p-[2px] text-[#F22555]" strokeWidth={2} />
         </span>
       );
