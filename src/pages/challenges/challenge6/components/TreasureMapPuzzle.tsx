@@ -130,9 +130,11 @@ interface TreasureMapPuzzleProps {
   isSolved: boolean;
   onSolve: () => void;
   onRedirect: () => void;
+  /** Ref transmis depuis page.tsx — pointe sur le conteneur beige pour mesurer la grille */
+  containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export function TreasureMapPuzzle({ isSolved, onSolve, onRedirect }: TreasureMapPuzzleProps) {
+export function TreasureMapPuzzle({ isSolved, onSolve, onRedirect, containerRef }: TreasureMapPuzzleProps) {
   const [pieces, setPieces] = useState<number[]>(() =>
     isSolved ? SOLVED_ORDER : shufflePieces()
   );
@@ -253,6 +255,7 @@ export function TreasureMapPuzzle({ isSolved, onSolve, onRedirect }: TreasureMap
         └─────────────────────────────────────────────────────────┘
       */}
       <div
+        ref={containerRef}
         className="mx-auto w-full max-w-[600px] overflow-hidden rounded-2xl border border-[#D2AE63]/70 bg-[#D8C18C] p-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] sm:p-4"
         aria-label="Puzzle de la carte au trésor, douze pièces à remettre dans l'ordre"
       >

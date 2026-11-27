@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowRight, Bird, Compass, LockKeyhole, MapPinned, Sparkles } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ChallengePageProps } from '../types';
@@ -7,12 +7,6 @@ import { ParrotEntranceAnimation } from './components/ParrotEntranceAnimation';
 import { PieceScatterTransition } from './components/PieceScatterTransition';
 import goalImage from './puzzle/goal.png';
 
-/**
- * Séquence d'entrée :
- *   phase 'parrot'   → perroquet vole et sort de l'écran
- *   phase 'scatter'  → fragments tombent puis convergent (lien narratif)
- *   phase 'puzzle'   → puzzle fade-in, interactif
- */
 type Phase = 'parrot' | 'scatter' | 'puzzle';
 
 export function Challenge6Page({
@@ -26,6 +20,10 @@ export function Challenge6Page({
   const [phase, setPhase] = useState<Phase>(
     isUnlocked && !alreadySolved ? 'parrot' : 'puzzle'
   );
+
+  // Ref sur le conteneur beige du puzzle — transmis à PieceScatterTransition
+  // pour qu'il puisse mesurer la position exacte de la grille
+  const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
   const handleSolve = () => {
     setHasSolved(true);
@@ -63,7 +61,7 @@ export function Challenge6Page({
         </div>
       ) : (
         <>
-          {/* ── Phase 1 : perroquet ── */}
+          {/* Phase 1 : perroquet */}
           <AnimatePresence>
             {phase === 'parrot' && (
               <ParrotEntranceAnimation
@@ -73,23 +71,25 @@ export function Challenge6Page({
             )}
           </AnimatePresence>
 
-          {/* ── Phase 2 : fragments éparpillés → convergence ── */}
+          {/* Phase 2 : pièces éparpillées → convergence vers la grille */}
           <AnimatePresence>
             {phase === 'scatter' && (
               <PieceScatterTransition
                 key="scatter"
+                puzzleContainerRef={puzzleContainerRef}
                 onDone={() => setPhase('puzzle')}
               />
             )}
           </AnimatePresence>
 
-          {/* ── Phase 3 : puzzle (fade-in depuis opacity 0) ── */}
+          {/* Puzzle — toujours rendu (pour que le ref soit mesurable pendant scatter) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: phase === 'puzzle' ? 1 : 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             <TreasureMapPuzzle
+              containerRef={puzzleContainerRef}
               isSolved={hasSolved}
               onSolve={handleSolve}
               onRedirect={() => onVoyageToMap(6)}
