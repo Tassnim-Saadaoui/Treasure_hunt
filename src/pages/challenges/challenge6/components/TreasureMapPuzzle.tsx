@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { motion } from 'motion/react';
 import { ArrowLeftRight, Shuffle } from 'lucide-react';
 import { soundEngine } from '../../../../lib/audio/soundEngine';
 import piece1 from '../puzzle/1.png';
@@ -35,22 +36,63 @@ const PIECE_IMAGES = [
 ];
 const SOLVED_ORDER = PIECE_IMAGES.map((_, index) => index + 1);
 
+function getTargetOffset(firstId: number, secondId: number) {
+  const firstRow = Math.floor((firstId - 1) / 3);
+  const firstColumn = (firstId - 1) % 3;
+  const secondRow = Math.floor((secondId - 1) / 3);
+  const secondColumn = (secondId - 1) % 3;
+  const columnDelta = secondColumn - firstColumn;
+  const rowDelta = secondRow - firstRow;
+
+  if (rowDelta === 0 && Math.abs(columnDelta) === 1) {
+    return { x: (columnDelta * 100) / 3, y: 0 };
+  }
+  if (columnDelta === 0 && Math.abs(rowDelta) === 1) {
+    return { x: 0, y: (rowDelta * 100) / 4 };
+  }
+  return null;
+}
+
+function getCorrectNeighborPairs(pieces: number[]) {
+  const pairs: [number, number][] = [];
+  for (let position = 0; position < pieces.length; position += 1) {
+    const column = position % 3;
+    const row = Math.floor(position / 3);
+    const piece = pieces[position];
+
+    if (column < 2 && getTargetOffset(piece, pieces[position + 1])?.x! > 0) {
+      pairs.push([piece, pieces[position + 1]]);
+    }
+    if (row < 3 && getTargetOffset(piece, pieces[position + 3])?.y! > 0) {
+      pairs.push([piece, pieces[position + 3]]);
+    }
+  }
+  return pairs;
+}
+
 function shufflePieces() {
-  const shuffled = [...SOLVED_ORDER];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-  }
-  if (shuffled.every((piece, index) => piece === index + 1)) {
-    [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
-  }
+  let shuffled: number[];
+  do {
+    shuffled = [...SOLVED_ORDER];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+
+    const hasCorrectNeighbor = getCorrectNeighborPairs(shuffled).length > 0;
+    const hasPieceInSolvedSlot = shuffled.some((piece, index) => piece === index + 1);
+    if (!hasPieceInSolvedSlot && !hasCorrectNeighbor) break;
+  } while (true);
+
   return shuffled;
 }
 
 export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps) {
   const [pieces, setPieces] = useState(() => (isSolved ? SOLVED_ORDER : shufflePieces()));
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+  const [snappingPieces, setSnappingPieces] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
+  const snapTimerRef = useRef<number | null>(null);
 
   const handlePieceClick = (position: number) => {
     if (isSolved) return;
@@ -65,11 +107,24 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
       return;
     }
 
+    const previouslyJoinedPairs = new Set(
+      getCorrectNeighborPairs(pieces).map(([first, second]) => `${first}:${second}`)
+    );
     const nextPieces = [...pieces];
     [nextPieces[selectedPosition], nextPieces[position]] = [nextPieces[position], nextPieces[selectedPosition]];
+    const newlyJoinedPairs = getCorrectNeighborPairs(nextPieces).filter(
+      ([first, second]) => !previouslyJoinedPairs.has(`${first}:${second}`)
+    );
     setPieces(nextPieces);
     setSelectedPosition(null);
     setMoves((current) => current + 1);
+
+    const piecesToSnap = [...new Set(newlyJoinedPairs.flat())];
+    if (piecesToSnap.length > 0) {
+      setSnappingPieces(piecesToSnap);
+      if (snapTimerRef.current !== null) window.clearTimeout(snapTimerRef.current);
+      snapTimerRef.current = window.setTimeout(() => setSnappingPieces([]), 320);
+    }
 
     if (nextPieces.every((piece, index) => piece === index + 1)) {
       soundEngine.play('treasureFanfare');
@@ -82,6 +137,7 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
     soundEngine.play('click');
     setPieces(shufflePieces());
     setSelectedPosition(null);
+    setSnappingPieces([]);
     setMoves(0);
   };
 
@@ -101,12 +157,13 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
         <div className="mx-auto grid aspect-square w-full max-w-[520px] grid-cols-3 grid-rows-4 gap-0 overflow-visible rounded-2xl border border-[#D2AE63]/70 bg-[#D8C18C] p-1.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)] sm:p-2" aria-label="Puzzle de la carte au trésor, douze pièces à remettre dans l’ordre">
           {pieces.map((pieceNumber, position) => {
             const isSelected = selectedPosition === position;
+            const isSnapping = snappingPieces.includes(pieceNumber);
             return (
               <button
                 key={position}
                 type="button"
                 onClick={() => handlePieceClick(position)}
-                aria-label={`Pièce ${pieceNumber}, position ${position + 1}${isSelected ? ', sélectionnée' : ''}`}
+                aria-label={`Pièce du puzzle à la position ${position + 1}${isSelected ? ', sélectionnée' : ''}`}
                 aria-pressed={isSelected}
                 disabled={isSolved}
                 className={`relative isolate z-0 flex min-h-0 min-w-0 items-center justify-center overflow-visible rounded-md border border-transparent bg-transparent transition-[border-color,transform,filter] duration-150 focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] disabled:cursor-default ${
@@ -115,10 +172,14 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
                     : 'hover:z-10 hover:border-[#F5C542]/80'
                 }`}
               >
-                <img
+                <motion.img
+                  key={pieceNumber}
                   src={PIECE_IMAGES[pieceNumber - 1]}
                   alt=""
                   draggable={false}
+                  initial={false}
+                  animate={isSnapping ? { scale: [0.96, 1.06, 1], rotate: [0, -1.5, 0] } : { scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.28, ease: 'easeOut' }}
                   className="pointer-events-none absolute h-[170%] w-[170%] max-w-none select-none object-contain"
                 />
               </button>
@@ -141,8 +202,6 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
           )}
         </div>
       </div>
-
-      
     </section>
   );
 }
