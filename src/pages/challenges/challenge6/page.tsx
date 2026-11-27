@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { ArrowRight, Bird, Compass, LockKeyhole, MapPinned, Sparkles } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import type { ChallengePageProps } from '../types';
 import { TreasureMapPuzzle } from './components/TreasureMapPuzzle';
+import { ParrotEntranceAnimation } from './components/ParrotEntranceAnimation';
 import goalImage from './puzzle/goal.png';
 
 export function Challenge6Page({
@@ -10,7 +12,10 @@ export function Challenge6Page({
   onComplete,
   onVoyageToMap,
 }: ChallengePageProps) {
-  const [hasSolved, setHasSolved] = useState(completedIds.includes(6));
+  const alreadySolved = completedIds.includes(6);
+  const [hasSolved, setHasSolved] = useState(alreadySolved);
+  // Show the parrot intro only the first time the player enters an unlocked, unsolved puzzle.
+  const [showIntro, setShowIntro] = useState(isUnlocked && !alreadySolved);
 
   const handleSolve = () => {
     setHasSolved(true);
@@ -34,8 +39,8 @@ export function Challenge6Page({
           <Bird className="mt-0.5 h-5 w-5 shrink-0 text-[#F5C542]" />
           <p className="text-sm leading-relaxed text-slate-200 sm:text-base">
             Barbe-Rouillée avait dessiné sa carte au trésor avec amour. Mais Gérard, une mouette voleuse,
-            l’a emportée pour faire son nid : les douze morceaux se sont éparpillés sur la plage. Gérard
-            jure qu’il n’y est pour rien… même s’il a encore un bout de papier dans le bec. Remets la
+            l'a emportée pour faire son nid : les douze morceaux se sont éparpillés sur la plage. Gérard
+            jure qu'il n'y est pour rien… même s'il a encore un bout de papier dans le bec. Remets la
             carte en ordre pour trouver où creuser, moussaillon !
           </p>
         </div>
@@ -44,10 +49,33 @@ export function Challenge6Page({
       {!isUnlocked ? (
         <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#0A1B42] p-5 text-slate-300" role="status">
           <LockKeyhole className="h-5 w-5 shrink-0 text-[#F5C542]" />
-          <p>Cette carte est encore scellée. Termine les étapes précédentes pour l’ouvrir.</p>
+          <p>Cette carte est encore scellée. Termine les étapes précédentes pour l'ouvrir.</p>
         </div>
       ) : (
-        <TreasureMapPuzzle isSolved={hasSolved} onSolve={handleSolve} onRedirect={() => onVoyageToMap(6)} />
+        <>
+          {/* Parrot intro — fixed full-screen overlay, pointer-events-none */}
+          <AnimatePresence>
+            {showIntro && (
+              <ParrotEntranceAnimation
+                key="parrot-intro"
+                onDone={() => setShowIntro(false)}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Puzzle fades in once the intro finishes */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: showIntro ? 0 : 1 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+          >
+            <TreasureMapPuzzle
+              isSolved={hasSolved}
+              onSolve={handleSolve}
+              onRedirect={() => onVoyageToMap(6)}
+            />
+          </motion.div>
+        </>
       )}
 
       {hasSolved && isUnlocked && (
@@ -62,7 +90,7 @@ export function Challenge6Page({
               <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-[#F5C542]" />
               <div>
                 <p className="font-semibold text-white">La carte est reconstituée !</p>
-                <p className="mt-1 text-sm text-slate-300">Le X indique l’endroit où creuser. Garde le code révélé pour la suite de l’aventure.</p>
+                <p className="mt-1 text-sm text-slate-300">Le X indique l'endroit où creuser. Garde le code révélé pour la suite de l'aventure.</p>
               </div>
             </div>
             <div className="w-full rounded-xl border border-[#F5C542]/40 bg-[#F5C542]/10 p-4 text-center">
@@ -74,7 +102,7 @@ export function Challenge6Page({
               onClick={() => onVoyageToMap(6)}
               className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#C8102E] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#E11D3F]"
             >
-              Terminer l’expédition <ArrowRight className="h-4 w-4" />
+              Terminer l'expédition <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
