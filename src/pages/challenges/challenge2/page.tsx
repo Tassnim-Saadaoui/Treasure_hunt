@@ -1,8 +1,6 @@
-import { ChallengePageFrame } from '../components/ChallengePageFrame';
+import { ChallengeTwo } from './components/ChallengeTwo';
 import type { ChallengePageProps } from '../types';
 
 export function Challenge2Page(props: ChallengePageProps) {
-  return (
-    <ChallengePageFrame {...props} challengeId={2} />
-  );
+  return <ChallengeTwo {...props} />;
 }

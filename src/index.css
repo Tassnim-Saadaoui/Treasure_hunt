@@ -34,4 +34,75 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  .auth-corner {
+    position: absolute;
+    z-index: 0;
+    width: 18rem;
+    height: 18rem;
+    border-radius: 9999px;
+    background: #b40f31;
+    opacity: 0.72;
+    pointer-events: none;
+  }
+
+  .auth-corner-top {
+    top: -15rem;
+    left: -12rem;
+    box-shadow: 2rem 1rem 0 -0.75rem #78142f;
+  }
+
+  .auth-corner-bottom {
+    right: -13rem;
+    bottom: -15rem;
+    box-shadow: -2rem -1rem 0 -0.75rem #78142f;
+  }
+
+  .drone-delivery-flight {
+    animation: drone-delivery-flight 2.4s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+  }
+
+  .transition-rain-drop {
+    width: 1.5px;
+    background: rgb(205 234 248 / 55%);
+    box-shadow: 0 0 3px rgb(151 210 237 / 25%);
+    transform: rotate(12deg);
+    animation-name: transition-rain-drop-fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes transition-rain-drop-fall {
+    from {
+      opacity: 0;
+      transform: translate3d(-3px, -12px, 0) rotate(12deg);
+    }
+
+    12% {
+      opacity: 0.6;
+    }
+
+    to {
+      opacity: 0;
+      transform: translate3d(14px, 72vh, 0) rotate(12deg);
+    }
+  }
+
+  @keyframes drone-delivery-flight {
+    0% {
+      transform: translate3d(-110vw, -50%, 0) rotate(-4deg);
+    }
+
+    36% {
+      transform: translate3d(-34vw, -62%, 0) rotate(0);
+    }
+
+    72% {
+      transform: translate3d(10vw, -43%, 0) rotate(1deg);
+    }
+
+    100% {
+      transform: translate3d(110vw, -54%, 0) rotate(4deg);
+    }
+  }
 }
