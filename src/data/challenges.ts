@@ -98,12 +98,12 @@ export const CHALLENGES: ChallengeDefinition[] = [
     difficulty: 'Final Boss',
     title: 'La carte de Barbe-Rouill\u00e9e',
     discipline: 'Navigation et observation',
-    shortPrompt: 'Reconstitue les neuf morceaux de la carte pour trouver le X et le code de la suite.',
+    shortPrompt: 'Remets les douze pièces de la carte dans l’ordre pour trouver le X et le code de la suite.',
     storyBrief:
-      'Barbe-Rouill\u00e9e avait dessin\u00e9 sa carte au tr\u00e9sor avec amour. La mouette G\u00e9rard l\u2019a vol\u00e9e pour faire son nid et en a dispers\u00e9 les neuf morceaux sur la plage. Remets la carte en ordre pour trouver o\u00f9 creuser.',
+      'Barbe-Rouill\u00e9e avait dessin\u00e9 sa carte au tr\u00e9sor avec amour. La mouette G\u00e9rard l\u2019a vol\u00e9e pour faire son nid et en a dispers\u00e9 les douze morceaux sur la plage. Remets la carte en ordre pour trouver o\u00f9 creuser.',
     locationHint: 'La crique de Barbe-Rouill\u00e9e',
     hints: [
-      'Observe les bords des morceaux et raccorde les traits du chemin pour reconstituer la carte.',
+      'Replace les pièces numérotées dans l’ordre, de 1 à 12, de gauche à droite puis rangée par rangée.',
       'Une fois assembl\u00e9e, la carte indique le X et r\u00e9v\u00e8le le code inscrit au dos.',
     ],
     clueToken: 'X',

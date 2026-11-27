@@ -33,7 +33,7 @@ export function Challenge6Page({
           <Bird className="mt-0.5 h-5 w-5 shrink-0 text-[#F5C542]" />
           <p className="text-sm leading-relaxed text-slate-200 sm:text-base">
             Barbe-Rouillée avait dessiné sa carte au trésor avec amour. Mais Gérard, une mouette voleuse,
-            l’a emportée pour faire son nid : les neuf morceaux se sont éparpillés sur la plage. Gérard
+            l’a emportée pour faire son nid : les douze morceaux se sont éparpillés sur la plage. Gérard
             jure qu’il n’y est pour rien… même s’il a encore un bout de papier dans le bec. Remets la
             carte en ordre pour trouver où creuser, moussaillon !
           </p>
@@ -46,7 +46,7 @@ export function Challenge6Page({
           <p>Cette carte est encore scellée. Termine les étapes précédentes pour l’ouvrir.</p>
         </div>
       ) : (
-        <TreasureMapPuzzle isSolved={hasSolved} imageSrc={null} onSolve={handleSolve} />
+        <TreasureMapPuzzle isSolved={hasSolved} onSolve={handleSolve} />
       )}
 
       {hasSolved && isUnlocked && (
