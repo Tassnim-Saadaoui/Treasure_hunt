@@ -51,11 +51,11 @@ export default function App() {
   }, [navigate, restoreProgress]);
 
   const handleSelectChallenge = useCallback((id: ChallengeId) => {
-    if (id === 2) {
+    if (id === 3) {
       setIsDroneEntryActive(true);
       return;
     }
-    if (id === 3) {
+    if (id === 5) {
       setIsChatbotEntryActive(true);
       return;
     }
@@ -71,7 +71,7 @@ export default function App() {
     if (!isDroneEntryActive) return;
     const timeoutId = window.setTimeout(() => {
       setIsDroneEntryActive(false);
-      navigate('/challenges/2', { silent: true });
+      navigate('/challenges/3', { silent: true });
     }, 2400);
     return () => window.clearTimeout(timeoutId);
   }, [isDroneEntryActive, navigate]);
@@ -80,7 +80,7 @@ export default function App() {
     if (!isChatbotEntryActive) return;
     const timeoutId = window.setTimeout(() => {
       setIsChatbotEntryActive(false);
-      navigate('/challenges/3', { silent: true });
+      navigate('/challenges/5', { silent: true });
     }, 2700);
     return () => window.clearTimeout(timeoutId);
   }, [isChatbotEntryActive, navigate]);

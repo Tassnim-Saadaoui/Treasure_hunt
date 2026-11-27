@@ -1,20 +1,22 @@
-import type { ChallengeDefinition } from '../domain/hunt/types';
+import type { ChallengeDefinition, ChallengeId } from '../domain/hunt/types';
 
-/** The trail is deliberately ordered from quick wins to multi-step reasoning. */
-export const CHALLENGES: ChallengeDefinition[] = [
+/** Existing content IDs in the new trail order: 5, 1, 2, 4, 3, 6. */
+export const CHALLENGE_CONTENT_ID_BY_STAGE: readonly ChallengeId[] = [5, 1, 2, 4, 3, 6];
+
+const CONTENT_CHALLENGES: ChallengeDefinition[] = [
   {
     id: 1,
     numberLabel: 'Challenge 1',
     difficulty: 'Warm-up',
-    title: 'The Departure',
-    discipline: 'Networking',
-    shortPrompt: 'Route the release packet from East to the North-East production node.',
+    title: 'L’Empreinte du Suspect',
+    discipline: 'Recherche d’indice',
+    shortPrompt: 'Trouvez le QR code caché et validez le mot-clé.',
     storyBrief:
-      'The release bot has one job: send the packet from East (90 degrees) to the North-East production node. It is currently pointing at staging. Rotate the compass 45 degrees counter-clockwise. DevOps says the deployment is "probably fine"; the compass disagrees.',
-    locationHint: 'The Router Room',
+      'Un indice QR est caché près de l’entrée principale. Scannez-le, puis entrez le mot-clé pour poursuivre la chasse.',
+    locationHint: 'Près de l’entrée principale',
     hints: [
-      'Treat the compass like a simple direction enum: East is 90 degrees. Which way gets you to North-East?',
-      'North-East is halfway between North (0) and East (90): select 45 degrees.',
+      'Cherchez près de l’entrée principale, autour d’une prise électrique.',
+      'Le QR code est à moins de trois mètres de l’entrée.',
     ],
     clueToken: 'Bonjour',
     estimatedMinutes: 2,
@@ -60,36 +62,36 @@ export const CHALLENGES: ChallengeDefinition[] = [
     id: 4,
     numberLabel: 'Challenge 4',
     difficulty: 'Intermediate',
-    title: 'The Encryption',
-    discipline: 'Binary and Encoding',
-    shortPrompt: 'Decode four ASCII bytes to find what the release is ready to do.',
+    title: 'Le Code de la Salle Serveur',
+    discipline: 'Observation et calcul',
+    shortPrompt: 'Repérez deux nombres dans la salle et multipliez-les pour trouver le code.',
     storyBrief:
-      'The CI runner printed its status in binary, then went offline to "focus." Decode the four 8-bit ASCII characters from left to right and enter the release instruction.',
-    locationHint: 'The CI Runner Cage',
+      'Repérez le nombre de sessions au programme et le nombre de membres du bureau, puis multipliez ces deux valeurs.',
+    locationHint: 'La salle serveur',
     hints: [
-      'Each 8-bit group is one ASCII character. Convert a byte to decimal, then use the ASCII table; for example, 0100 0001 is 65, or A.',
-      'The four bytes decode to S, H, I, P. The runner may now go back to sleep.',
+      'Observez le nombre de sessions au programme et comptez les membres du bureau.',
+      'Multipliez les deux nombres pour obtenir le code.',
     ],
-    clueToken: 'I7',
-    estimatedMinutes: 5,
+    clueToken: '20',
+    estimatedMinutes: 2,
     side: 'right',
   },
   {
     id: 5,
     numberLabel: 'Challenge 5',
     difficulty: 'Hard',
-    title: 'The Crossing',
-    discipline: 'Scheduling and Optimization',
-    shortPrompt: 'Move four CI jobs across a flaky bridge in 17 minutes or less.',
+    title: 'L’Énigme musicale',
+    discipline: 'Écoute et déduction',
+    shortPrompt: 'Écoutez le rythme et trouvez les deux notes manquantes.',
     storyBrief:
-      'Four pipeline jobs must cross the bridge to production. The bridge can run at most two jobs at a time, and the single runner token must travel with every crossing. A pair moves at the slower job\'s speed. Ship everything in 17 minutes or less, or the legacy build gets another hour.',
-    locationHint: 'The Production Bridge',
+      'Le studio a laissé deux notes manquantes à la fin du roulement. Écoutez le motif, repérez sa progression et complétez les deux temps.',
+    locationHint: 'Le studio de batterie',
     hints: [
-      'The two slowest jobs are expensive to move separately. Consider sending them together, then plan how the runner token returns.',
-      'One optimal schedule is: Lint + Unit Tests (2), Lint back (1), Integration Tests + Legacy Build (10), Unit Tests back (2), Lint + Unit Tests (2). Total: 17 minutes.',
+      'Écoutez les trois mesures et repérez le motif qui se répète.',
+      'La séquence complète se termine par les notes S puis P.',
     ],
-    clueToken: 'GREEN',
-    estimatedMinutes: 8,
+    clueToken: 'SP',
+    estimatedMinutes: 3,
     side: 'left',
   },
   {
@@ -111,6 +113,19 @@ export const CHALLENGES: ChallengeDefinition[] = [
     side: 'right',
   },
 ];
+
+/** Stage IDs describe progression order; content IDs keep page implementations identifiable. */
+export const CHALLENGES: ChallengeDefinition[] = CHALLENGE_CONTENT_ID_BY_STAGE.map(
+  (contentId, index) => {
+    const content = CONTENT_CHALLENGES.find((challenge) => challenge.id === contentId);
+    if (!content) throw new Error(`Challenge content ${contentId} is missing.`);
+    return {
+      ...content,
+      id: (index + 1) as ChallengeId,
+      numberLabel: `Challenge ${index + 1}`,
+    };
+  }
+);
 
 export function getChallengeById(id: number): ChallengeDefinition | undefined {
   return CHALLENGES.find((challenge) => challenge.id === id);

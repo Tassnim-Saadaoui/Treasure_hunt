@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Check, Lock, Ship, Sparkles } from 'lucide-react';
-import { CHALLENGES } from '../../../data/challenges';
+import { CHALLENGES, CHALLENGE_CONTENT_ID_BY_STAGE } from '../../../data/challenges';
 import { soundEngine } from '../../../lib/audio/soundEngine';
 import type { ChallengeId } from '../../../domain/hunt/types';
 import { ChallengeIcon, TreasureChestIllustration } from '../../../components/artwork/ChallengeArtwork';
@@ -192,7 +192,7 @@ export function TreasureTrailMap({
                   } ${isLeft ? 'flex-row' : 'flex-row-reverse text-right'}`}
                 >
                   <div className="flex min-w-0 w-[116px] flex-row items-center gap-1.5 text-left sm:w-auto sm:min-w-[150px] sm:flex-col sm:gap-0 sm:text-center lg:min-w-[220px] xl:min-w-[250px]">
-                    <ChallengeIcon id={challenge.id} className={`h-8 w-8 shrink-0 sm:mt-1.5 sm:h-20 sm:w-20 lg:h-28 lg:w-28 xl:h-32 xl:w-32 ${isUnlocked ? '' : 'grayscale'}`} />
+                    <ChallengeIcon id={CHALLENGE_CONTENT_ID_BY_STAGE[challenge.id - 1]} className={`h-8 w-8 shrink-0 sm:mt-1.5 sm:h-20 sm:w-20 lg:h-28 lg:w-28 xl:h-32 xl:w-32 ${isUnlocked ? '' : 'grayscale'}`} />
                     <div className="flex min-w-0 flex-col sm:items-center">
                       <span className="text-[11px] font-semibold leading-tight text-white sm:mt-2 sm:text-sm lg:text-lg xl:text-xl">Challenge {challenge.id}</span>
                       <span className="mt-0.5 text-[9px] font-bold leading-tight text-[#F5C542] sm:text-xs lg:mt-1 lg:text-sm xl:text-base">

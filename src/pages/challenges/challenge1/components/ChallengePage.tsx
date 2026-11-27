@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import { soundEngine } from '../../../../lib/audio/soundEngine';
-import { getChallengeById } from '../../../../data/challenges';
 import { PlayerAuthError, submitChallenge1Answer } from '../../../../infrastructure/persistence/PlayerAuthClient';
 import type { ChallengePageProps } from '../../types';
 import { AnswerSection } from './AnswerSection';
@@ -9,9 +8,6 @@ import { HintButton } from './HintButton';
 import { HintModal } from './HintModal';
 import { QRCodeScanner } from './QRCodeScanner';
 import { SituationCard } from './SituationCard';
-
-const challenge = getChallengeById(1);
-if (!challenge) throw new Error('Challenge 1 configuration is missing.');
 
 const hint = "Cherchez là où l'on branche l'énergie, à moins de 3 mètres de l'entrée principale.";
 

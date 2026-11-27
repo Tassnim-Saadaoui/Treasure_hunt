@@ -171,7 +171,7 @@ export function Challenge5Page({
 
           <div className="relative mt-3 flex justify-center">
             <span className="rounded-full border border-[#00B8FF]/50 bg-[#061735]/80 px-4 py-1.5 text-xs font-semibold tracking-wide text-white shadow-[0_0_20px_rgba(0,184,255,0.12)]">
-              <span className="mr-2 text-[#E11D48]">●</span>Énigme musicale · Challenge 5
+              <span className="mr-2 text-[#E11D48]">●</span>Énigme musicale · Challenge 1
             </span>
           </div>
 

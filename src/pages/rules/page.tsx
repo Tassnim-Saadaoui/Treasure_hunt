@@ -27,7 +27,7 @@ export function RulesView({ soundEnabled, onToggleSound, onNavigate }: RulesView
             Expedition Rules & Guide
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-300 leading-relaxed">
-            Six software-themed challenges ramp from a quick warm-up to a production-readiness final. Debug the incident, decode the CI log, optimize the deployment, and collect clue tokens for the vault.
+            Follow six stages in order: complete the drum pattern, find the QR clue, diagnose the drone, discover the room code, solve the server logic puzzle, and rebuild the treasure map.
           </p>
         </div>
 
@@ -35,7 +35,7 @@ export function RulesView({ soundEnabled, onToggleSound, onNavigate }: RulesView
           <div className="space-y-2">
             <h2 className="font-display text-base font-bold text-[#F5C542]">01. Follow the Trail</h2>
             <p className="text-sm text-slate-300 leading-relaxed">
-              Follow the trail in order for a gradual difficulty ramp: warm-up, fundamentals, debugging, encoding, optimization, then the final systems challenge.
+              Follow the numbered trail. Each completed stage unlocks the next one, and the sixth stage leads to the treasure map.
             </p>
           </div>
           <div className="space-y-2">
@@ -47,7 +47,7 @@ export function RulesView({ soundEnabled, onToggleSound, onNavigate }: RulesView
           <div className="space-y-2">
             <h2 className="font-display text-base font-bold text-[#F5C542]">03. Interactive Audio</h2>
             <p className="text-sm text-slate-300 leading-relaxed">
-              Synthesized Web Audio adds feedback to routing, gear math, decoding, deployments, and the vault. Mute or test audio anytime.
+              Synthesized Web Audio adds feedback to the drum pattern, drone diagnosis, logic puzzle, and treasure hunt. Mute or test audio anytime.
             </p>
           </div>
         </div>
