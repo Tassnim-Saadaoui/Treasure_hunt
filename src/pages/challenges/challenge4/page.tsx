@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Building2, LockKeyhole, ScanEye, X } from 'lucide-react';
+import { Building2, LockKeyhole, LockKeyholeOpen, ScanEye, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ChallengePageProps } from '../types';
 import { BuildingCluesPuzzle } from './components/BuildingCluesPuzzle';
@@ -18,6 +18,7 @@ export function Challenge4Page({
 }: ChallengePageProps) {
   const [hasSolved, setHasSolved]     = useState(completedIds.includes(4));
   const [showOverlay, setShowOverlay] = useState(false);
+  const [lockOpen, setLockOpen]       = useState(false);
   const [toasts, setToasts]           = useState<Toast[]>([]);
   const timersRef                     = useRef<Map<number, number>>(new Map());
   const redirectTimerRef              = useRef<number | null>(null);
@@ -87,23 +88,38 @@ export function Challenge4Page({
               animate={{ scale: 1,    opacity: 1, y: 0  }}
               transition={{ delay: 0.1, type: 'spring', stiffness: 320, damping: 24 }}
             >
-              {/* Scan lines animation — server / architecture vibe */}
-              <div className="mb-6 flex flex-col items-center gap-1.5" aria-hidden="true">
-                {[0, 1, 2, 3].map((i) => (
+              {/* Lock unlock animation — closed → shake → open → fade out */}
+              <div className="mb-6 flex items-center justify-center" aria-hidden="true">
+                <AnimatePresence mode="wait">
+                  {/* Step 1: locked + shake (0 → 0.6 s) */}
                   <motion.div
-                    key={i}
-                    className="h-[3px] rounded-full bg-[#38BDF8]"
-                    initial={{ width: '0%', opacity: 0 }}
-                    animate={{ width: ['0%', '100%', '60%', '85%', '40%'], opacity: [0, 1, 0.7, 1, 0.5] }}
+                    key="locked"
+                    initial={{ opacity: 1, rotate: 0, scale: 1 }}
+                    animate={{ rotate: [-6, 6, -5, 5, -3, 3, 0], scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5, y: -10 }}
                     transition={{
-                      duration: 1.2,
-                      delay: i * 0.18,
-                      repeat: Infinity,
-                      repeatType: 'mirror',
-                      ease: 'easeInOut',
+                      rotate: { duration: 0.5, delay: 0.15, ease: 'easeInOut' },
                     }}
-                  />
-                ))}
+                    onAnimationComplete={() => setLockOpen(true)}
+                    className="text-[#38BDF8]"
+                    style={{ display: lockOpen ? 'none' : 'block' }}
+                  >
+                    <LockKeyhole className="h-14 w-14" strokeWidth={1.5} />
+                  </motion.div>
+
+                  {/* Step 2: open → rise and fade (0.7 → 1.6 s) */}
+                  {lockOpen && (
+                    <motion.div
+                      key="open"
+                      initial={{ opacity: 0, scale: 0.6, y: 8 }}
+                      animate={{ opacity: [0, 1, 1, 0], scale: [0.6, 1.15, 1.1, 0.8], y: [8, 0, -4, -20] }}
+                      transition={{ duration: 0.9, times: [0, 0.25, 0.6, 1], ease: 'easeOut' }}
+                      className="text-[#38BDF8]"
+                    >
+                      <LockKeyholeOpen className="h-14 w-14" strokeWidth={1.5} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Status line */}
