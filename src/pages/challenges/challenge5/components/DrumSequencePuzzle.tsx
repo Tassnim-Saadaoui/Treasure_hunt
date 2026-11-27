@@ -358,14 +358,13 @@ export function DrumSequencePuzzle({ isSolved, onSolve, onWrongAttempt }: DrumSe
                       key={h.id}
                       type="button"
                       onClick={() => handlePick(slotIdx, h.id)}
-                      className={`flex flex-1 flex-col items-center gap-1 rounded-xl border py-3 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] ${
+                      className={`flex flex-1 items-center justify-center rounded-xl border py-3 text-sm font-black transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] ${
                         active
                           ? `${h.activeColor} scale-[1.04] text-white`
                           : `${h.color} text-slate-300 hover:border-white/40`
                       }`}
                     >
-                      <span className="text-xl">{h.icon}</span>
-                      <span className="text-xs font-black">{h.id}</span>
+                      {h.id}
                     </button>
                   );
                 })}
@@ -375,25 +374,7 @@ export function DrumSequencePuzzle({ isSolved, onSolve, onWrongAttempt }: DrumSe
         </div>
       )}
 
-      {/* ── Success feedback ── */}
-      <AnimatePresence>
-        {submitted && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-4"
-          >
-            <p className="font-semibold text-emerald-300">🥁 Roulement parfait !</p>
-            <p className="mt-1 text-sm text-slate-300">
-              La mesure se clôt sur un{' '}
-              <span className="font-bold text-[#38BDF8]">S (Symbole)</span> pour
-              marquer la fin du temps, puis repart sur un{' '}
-              <span className="font-bold text-[#C8102E]">P (Pied)</span> pour
-              lancer la mesure suivante. Le studio est déverrouillé !
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ── Success feedback — supprimé, géré par page.tsx ── */}
 
       {/* ── Action bar ── */}
       {!submitted && (

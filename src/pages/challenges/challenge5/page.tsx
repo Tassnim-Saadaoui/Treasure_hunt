@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Drum, LockKeyhole, MapPinned, Music } from 'lucide-react';
+import { ArrowRight, Drum, LockKeyhole, Music } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ChallengePageProps } from '../types';
 import { DrumSequencePuzzle } from './components/DrumSequencePuzzle';
@@ -96,14 +96,11 @@ export function Challenge5Page({
           transition={{ duration: 0.4 }}
           className="flex flex-col items-start gap-4 rounded-2xl border border-[#F5C542]/30 bg-[#F5C542]/[0.07] p-5 sm:p-6"
         >
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 text-xl">🎵</span>
-            <div>
-              <p className="font-semibold text-white">Studio déverrouillé !</p>
-              <p className="mt-1 text-sm text-slate-300">
-                Le roulement est complet. La piste audio se relance. Note le code pour la suite de l'aventure.
-              </p>
-            </div>
+          <div>
+            <p className="font-semibold text-white">Studio déverrouillé !</p>
+            <p className="mt-1 text-sm text-slate-300">
+              Le roulement est complet. La piste audio se relance. Note le code pour la suite de l'aventure.
+            </p>
           </div>
 
           <div className="w-full rounded-xl border border-[#F5C542]/40 bg-[#F5C542]/10 p-4 text-center">
@@ -121,10 +118,6 @@ export function Challenge5Page({
         </motion.div>
       )}
 
-      <p className="flex items-center justify-center gap-2 text-center text-xs text-slate-500">
-        <MapPinned className="h-3.5 w-3.5" />
-        Le Studio de l'IA Musicale
-      </p>
     </section>
   );
 }
