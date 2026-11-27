@@ -11,11 +11,15 @@ import {
   toggleSound as toggleSoundProgress,
 } from '../domain/hunt/progress';
 import { soundEngine } from '../lib/audio/soundEngine';
-import type { ChallengeId, ExplorerProfile } from '../domain/hunt/types';
+import type { ChallengeId, ExplorerProfile, HuntProgressState } from '../domain/hunt/types';
 
-export function useTreasureHuntState(repository: HuntProgressRepository) {
+export function useTreasureHuntState(
+  repository: HuntProgressRepository,
+  isAuthenticated: boolean
+) {
   const [state, setState] = useState(createInitialProgressState);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [persistenceError, setPersistenceError] = useState<string | null>(null);
 
   useEffect(() => {
     let isCurrent = true;
@@ -36,10 +40,30 @@ export function useTreasureHuntState(repository: HuntProgressRepository) {
   useEffect(() => {
     if (!isHydrated) return;
     soundEngine.setEnabled(state.soundEnabled);
-    void repository.save(state).catch(() => {
-      // The current browser adapter handles its own errors; a future API adapter can report them here.
-    });
   }, [isHydrated, repository, state]);
+
+  useEffect(() => {
+    if (!isHydrated || !isAuthenticated) return;
+    let isCurrent = true;
+    void repository.save(state).then(() => {
+      if (isCurrent) setPersistenceError(null);
+    }).catch((error: unknown) => {
+      if (isCurrent) {
+        setPersistenceError(
+          error instanceof Error ? error.message : 'Could not save your adventure progress.'
+        );
+      }
+    });
+    return () => {
+      isCurrent = false;
+    };
+  }, [isAuthenticated, isHydrated, repository, state]);
+
+  const restoreProgress = useCallback((savedState: HuntProgressState) => {
+    setState(savedState);
+    setIsHydrated(true);
+    setPersistenceError(null);
+  }, []);
 
   const toggleSound = useCallback(() => {
     setState((current) => {
@@ -72,6 +96,8 @@ export function useTreasureHuntState(repository: HuntProgressRepository) {
   return {
     state,
     isHydrated,
+    persistenceError,
+    restoreProgress,
     nextRecommendedId: getNextChallengeId(state.completedIds),
     isAllCompleted: areAllChallengesCompleted(state.completedIds),
     toggleSound,

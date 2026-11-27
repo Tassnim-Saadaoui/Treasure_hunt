@@ -1,8 +1,6 @@
-import { ChallengePageFrame } from '../components/ChallengePageFrame';
+import { ChallengeThree } from './components/ChallengeThree';
 import type { ChallengePageProps } from '../types';
 
 export function Challenge3Page(props: ChallengePageProps) {
-  return (
-    <ChallengePageFrame {...props} challengeId={3} />
-  );
+  return <ChallengeThree {...props} />;
 }

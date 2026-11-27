@@ -1,7 +1,8 @@
 export type ChallengeId = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type AppRoute =
-  | { path: '/'; view: 'home' }
+  | { path: '/'; view: 'login' }
+  | { path: '/map'; view: 'home' }
   | { path: `/challenges/${ChallengeId}`; view: 'challenge'; challengeId: ChallengeId };
 
 export type ChallengeStatus = 'locked' | 'active' | 'completed';
@@ -26,6 +27,7 @@ export interface ExplorerProfile {
   teamName: string;
   specialty: 'Frontend' | 'Backend' | 'DevOps' | 'QA / Testing';
   joinedAt: number;
+  avatar?: string;
 }
 
 export interface HuntProgressState {

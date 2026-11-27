@@ -15,13 +15,14 @@ function parsePathname(pathname: string): AppRoute {
     };
   }
 
-  return { path: '/', view: 'home' };
+  if (normalized === '/map') return { path: '/map', view: 'home' };
+  return { path: '/', view: 'login' };
 }
 
 export function useAppRouter() {
   const [route, setRoute] = useState<AppRoute>(() => {
     if (typeof window === 'undefined') {
-      return { path: '/', view: 'home' };
+      return { path: '/', view: 'login' };
     }
     return parsePathname(window.location.pathname);
   });
