@@ -247,12 +247,12 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
         └─────────────────────────────────────────────────────────┘
       */}
       <div
-        className="mx-auto w-full max-w-[520px] overflow-hidden rounded-2xl border border-[#D2AE63]/70 shadow-[0_18px_40px_rgba(0,0,0,0.28)]"
+        className="mx-auto w-full max-w-[600px] overflow-hidden rounded-2xl border border-[#D2AE63]/70 bg-[#D8C18C] p-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] sm:p-4"
         aria-label="Puzzle de la carte au trésor, douze pièces à remettre dans l'ordre"
       >
         {/* Inner container: aspect ratio = TOTAL_W / TOTAL_H */}
         <div
-          className="relative w-full overflow-visible bg-[#D8C18C]"
+          className="relative w-full overflow-visible rounded-lg bg-[#D8C18C]"
           style={{ paddingTop: `${(TOTAL_H / TOTAL_W) * 100}%` }}
         >
           {/* ── Piece images (absolutely positioned, overlap at tabs) ── */}
