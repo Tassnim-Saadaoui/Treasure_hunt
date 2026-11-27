@@ -1,4 +1,5 @@
 import type { ChallengeId } from '../../domain/hunt/types';
+import { Building2, Compass, Drum, MapPinned } from 'lucide-react';
 
 interface ArtworkProps {
   className?: string;
@@ -218,10 +219,15 @@ export function ChallengeIcon({ id, className }: { id: ChallengeId; className?: 
     case 3:
       return <MapMagnifierIllustration className={className} />;
     case 4:
-      return <CircuitChipIllustration className={className} />;
+      return <Building2 className={className ? `${className} text-[#00B8FF]` : 'h-16 w-16 text-[#00B8FF]'} strokeWidth={1.5} />;
     case 5:
-      return <SuspensionBridgeIllustration className={className} />;
+      return <Drum className={className ? `${className} text-[#00B8FF]` : 'h-16 w-16 text-[#00B8FF]'} strokeWidth={1.5} />;
     case 6:
-      return <GoldenKeyIllustration className={className} />;
+      return (
+        <span className={`relative inline-flex shrink-0 items-center justify-center ${className ?? 'h-16 w-16'}`} aria-hidden="true">
+          <Compass className="h-[82%] w-[82%] text-[#00B8FF]" strokeWidth={1.5} />
+          <MapPinned className="absolute bottom-[2%] right-[1%] h-[42%] w-[42%] rounded-full bg-[#061433] p-[2px] text-[#F22555]" strokeWidth={2} />
+        </span>
+      );
   }
 }
