@@ -5,7 +5,6 @@
 
 import { useCallback, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { TopNavBar } from './components/layout/TopNavBar';
 import { useTreasureHuntState } from './hooks/useTreasureHuntState';
 import { huntProgressRepository } from './infrastructure/persistence/LocalStorageHuntProgressRepository';
 import { useAppRouter } from './lib/router/useAppRouter';
@@ -45,7 +44,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#051029] text-slate-100">
-      <TopNavBar />
 
       <main className="flex-1 px-2 py-2 sm:px-6 sm:py-8 lg:px-10">
         <div className="mx-auto w-full max-w-[1200px]">
