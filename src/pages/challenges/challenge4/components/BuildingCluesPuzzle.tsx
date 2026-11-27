@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { soundEngine } from '../../../../lib/audio/soundEngine';
 
 interface BuildingCluesPuzzleProps {
@@ -116,22 +116,6 @@ export function BuildingCluesPuzzle({ isSolved, onSolve, onWrongAttempt }: Build
           {isSolved ? 'Déverrouillé' : 'Valider'}
         </button>
       </motion.form>
-
-      {/* ── Success ── */}
-      <AnimatePresence>
-        {isSolved && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4"
-          >
-            <p className="font-semibold text-emerald-300">Accès accordé !</p>
-            <p className="mt-1 text-sm text-slate-300">
-              La porte de secours du serveur s'ouvre. Tu as su lire ton environnement.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
