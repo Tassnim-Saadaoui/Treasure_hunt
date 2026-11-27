@@ -271,11 +271,14 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
                 style={{
                   ...style,
                   /**
-                   * Z-index: selected piece on top (z=20), snapping next (z=10),
-                   * otherwise use row-major order so lower pieces render above
-                   * upper ones (tabs typically protrude downward/rightward).
+                   * Z-index: selected piece on top (z=30), snapping next (z=20),
+                   * otherwise REVERSE row-major order so top-row pieces render
+                   * above bottom-row pieces.  Their downward tabs must cover the
+                   * top-edge blank of the row below; without this the bottom
+                   * piece's upward tab would incorrectly sit on top and create a
+                   * visible overlap seam.
                    */
-                  zIndex: isSelected ? 20 : isSnapping ? 10 : position + 1,
+                  zIndex: isSelected ? 30 : isSnapping ? 20 : ROWS * COLS - position,
                   filter: isSelected
                     ? 'drop-shadow(0 0 6px rgba(245,197,66,0.9)) drop-shadow(0 2px 4px rgba(83,56,20,0.6))'
                     : 'drop-shadow(0 1px 2px rgba(83,56,20,0.45))',
