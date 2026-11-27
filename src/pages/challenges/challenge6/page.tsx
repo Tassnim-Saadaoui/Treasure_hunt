@@ -47,7 +47,7 @@ export function Challenge6Page({
           <p>Cette carte est encore scellée. Termine les étapes précédentes pour l’ouvrir.</p>
         </div>
       ) : (
-        <TreasureMapPuzzle isSolved={hasSolved} onSolve={handleSolve} />
+        <TreasureMapPuzzle isSolved={hasSolved} onSolve={handleSolve} onRedirect={() => onVoyageToMap(6)} />
       )}
 
       {hasSolved && isUnlocked && (

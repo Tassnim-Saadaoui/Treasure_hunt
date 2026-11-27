@@ -25,7 +25,7 @@
 
 import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeftRight, Shuffle } from 'lucide-react';
+import { ArrowLeftRight, Shuffle, Sparkles } from 'lucide-react';
 import { soundEngine } from '../../../../lib/audio/soundEngine';
 import piece1 from '../puzzle/1.png';
 import piece2 from '../puzzle/2.png';
@@ -129,15 +129,18 @@ function shufflePieces(): number[] {
 interface TreasureMapPuzzleProps {
   isSolved: boolean;
   onSolve: () => void;
+  onRedirect: () => void;
 }
 
-export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps) {
+export function TreasureMapPuzzle({ isSolved, onSolve, onRedirect }: TreasureMapPuzzleProps) {
   const [pieces, setPieces] = useState<number[]>(() =>
     isSolved ? SOLVED_ORDER : shufflePieces()
   );
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
   const [snappingPieces, setSnappingPieces] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
+  // true while the solve animation is playing, then stays true
+  const [justSolved, setJustSolved] = useState(isSolved);
   const snapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Interaction ──────────────────────────────────────────────────────────
@@ -179,7 +182,10 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
 
     if (next.every((p, i) => p === i + 1)) {
       soundEngine.play('treasureFanfare');
+      setJustSolved(true);
       onSolve();
+      // Redirect to map after the banner animation completes (~3.2 s)
+      setTimeout(() => onRedirect(), 3200);
     }
   }
 
@@ -328,6 +334,137 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
               />
             );
           })}
+
+          {/* ── Golden seam lines (animate in on solve) ── */}
+          <AnimatePresence>
+            {justSolved && (
+              <motion.svg
+                key="golden-seams"
+                className="pointer-events-none absolute inset-0 h-full w-full"
+                viewBox={`0 0 ${TOTAL_W} ${TOTAL_H}`}
+                preserveAspectRatio="none"
+                style={{ zIndex: 40 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+              >
+                {/* Vertical seam lines */}
+                {[1, 2].map((c) => (
+                  <motion.line
+                    key={`v${c}`}
+                    x1={c * CORE_W} y1={0}
+                    x2={c * CORE_W} y2={TOTAL_H}
+                    stroke="#F5C542"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.15 + c * 0.1, ease: 'easeOut' }}
+                  />
+                ))}
+                {/* Horizontal seam lines */}
+                {[1, 2, 3].map((r) => (
+                  <motion.line
+                    key={`h${r}`}
+                    x1={0}        y1={r * CORE_H}
+                    x2={TOTAL_W}  y2={r * CORE_H}
+                    stroke="#F5C542"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.35 + r * 0.1, ease: 'easeOut' }}
+                  />
+                ))}
+                {/* Golden glow on seams */}
+                {[1, 2].map((c) => (
+                  <motion.line
+                    key={`vg${c}`}
+                    x1={c * CORE_W} y1={0}
+                    x2={c * CORE_W} y2={TOTAL_H}
+                    stroke="#FFE87A"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    opacity={0.35}
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.5, delay: 0.15 + c * 0.1, ease: 'easeOut' }}
+                  />
+                ))}
+                {[1, 2, 3].map((r) => (
+                  <motion.line
+                    key={`hg${r}`}
+                    x1={0}        y1={r * CORE_H}
+                    x2={TOTAL_W}  y2={r * CORE_H}
+                    stroke="#FFE87A"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    opacity={0.35}
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.5, delay: 0.35 + r * 0.1, ease: 'easeOut' }}
+                  />
+                ))}
+              </motion.svg>
+            )}
+          </AnimatePresence>
+
+          {/* ── Success banner (appears over the solved puzzle) ── */}
+          <AnimatePresence>
+            {justSolved && (
+              <motion.div
+                key="success-banner"
+                className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2"
+                style={{ zIndex: 50 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.4 }}
+              >
+                {/* Dark vignette behind text */}
+                <div className="absolute inset-0 rounded-lg bg-[#07132E]/60 backdrop-blur-[2px]" />
+
+                <motion.div
+                  className="relative flex flex-col items-center gap-2 px-4 text-center"
+                  initial={{ scale: 0.7, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.95, type: 'spring', stiffness: 320, damping: 22 }}
+                >
+                  {/* Sparkle icon */}
+                  <motion.div
+                    animate={{ rotate: [0, 15, -15, 10, -10, 0], scale: [1, 1.25, 1] }}
+                    transition={{ delay: 1.1, duration: 0.7, ease: 'easeInOut' }}
+                  >
+                    <Sparkles className="h-10 w-10 text-[#F5C542] drop-shadow-[0_0_12px_rgba(245,197,66,0.9)]" />
+                  </motion.div>
+
+                  <p className="font-display text-xl font-black tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] sm:text-2xl">
+                    Challenge 6 résolu !
+                  </p>
+                  <p className="text-sm font-semibold text-[#F5C542] drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                    La carte est reconstituée avec succès ✓
+                  </p>
+
+                  {/* Redirect countdown dots */}
+                  <motion.div
+                    className="mt-1 flex gap-1.5"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.5 }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <motion.span
+                        key={i}
+                        className="h-1.5 w-1.5 rounded-full bg-[#F5C542]"
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{ duration: 1, delay: 1.6 + i * 0.2, repeat: Infinity }}
+                      />
+                    ))}
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
         </div>
       </div>
 
