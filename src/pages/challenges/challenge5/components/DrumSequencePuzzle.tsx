@@ -4,7 +4,8 @@ import { Play, RotateCcw } from 'lucide-react';
 import { soundEngine } from '../../../../lib/audio/soundEngine';
 import {
   playDrumSequence,
-  getOrCreateAudioContext,
+  unlockAudioContext,
+  getAudioContext,
   type DrumHit,
 } from '../lib/drumPlayer';
 
@@ -107,7 +108,6 @@ export function DrumSequencePuzzle({ isSolved, onSolve, onWrongAttempt }: DrumSe
 
   // Refs
   const cancelPlaybackRef = useRef<(() => void) | null>(null);
-  const audioCtxRef       = useRef<AudioContext | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -121,21 +121,23 @@ export function DrumSequencePuzzle({ isSolved, onSolve, onWrongAttempt }: DrumSe
   const handlePlay = () => {
     if (isPlaying) return;
 
-    // Lazily create / resume AudioContext on user gesture (browser policy)
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = getOrCreateAudioContext();
-    }
-    const ctx = audioCtxRef.current;
+    // ── iOS/Android unlock — MUST happen synchronously in this onClick ──
+    // 1. getAudioContext() creates or reuses the AudioContext
+    // 2. unlockAudioContext() calls resume() AND fires a silent node
+    //    in the same synchronous call stack — this is what actually
+    //    unlocks audio on iOS Safari and Android Chrome.
+    // 3. playDrumSequence() schedules all notes immediately after,
+    //    also synchronously, with a 200ms lookahead that covers the
+    //    iOS resume latency.
+    const ctx = getAudioContext();
     if (!ctx) return;
 
-    if (ctx.state === 'suspended') {
-      void ctx.resume();
-    }
+    unlockAudioContext(ctx); // synchronous unlock
 
     setIsPlaying(true);
     setPlayingIndex(null);
 
-    cancelPlaybackRef.current = playDrumSequence(
+    cancelPlaybackRef.current = playDrumSequence( // synchronous scheduling
       ctx,
       SEQUENCE,
       BPM,

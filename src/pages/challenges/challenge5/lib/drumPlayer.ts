@@ -1,135 +1,170 @@
 /**
- * drumPlayer.ts
+ * drumPlayer.ts — mobile-safe Web Audio drum synthesiser
  *
- * Synthesises three realistic-sounding drum hits entirely with Web Audio API
- * (no samples, no external files) and plays a sequence of them at a given BPM.
+ * iOS/Android unlock strategy
+ * ───────────────────────────
+ * Mobile browsers require that BOTH of these happen synchronously inside
+ * the same user-gesture call stack (the button onClick):
+ *   1. new AudioContext()  — or ctx.resume() on an existing suspended one
+ *   2. At least one AudioNode.start() call
  *
- * SOUND DESIGN
- * ─────────────
- * Kick  (P) : pitched sine sweep 150 → 40 Hz (0.35 s) + very short noise transient.
- *             Models the low-frequency "thud" of a bass drum.
- * Snare (C) : bandpass-filtered white noise (centre 250 Hz) + sharp high tone (180 Hz).
- *             Models the crack + body of a snare drum.
- * Cymbal (S): highpass-filtered white noise (> 5 kHz) with medium-long decay (0.4 s).
- *             Models the airy metallic wash of an open hi-hat / crash.
+ * If either happens inside a Promise/await the browser treats it as
+ * "not user-initiated" and keeps the context suspended forever.
  *
- * TIMING
- * ──────
- * All scheduling uses AudioContext.currentTime offsets — sample-accurate and
- * immune to JS timer drift.  Visual callbacks use window.setTimeout aligned to
- * the same offsets so the highlight stays in sync on mobile.
- *
- * USAGE
- * ──────
- * const cancel = playDrumSequence(ctx, hits, bpm, onNote, onEnd);
- * // call cancel() to abort early (e.g. component unmount)
+ * Solution:
+ *   • unlockAudioContext(ctx) — call this SYNCHRONOUSLY in the onClick.
+ *     It resumes the ctx AND immediately starts a silent 1-frame oscillator.
+ *     This satisfies both requirements on every browser.
+ *   • playDrumSequence() then uses a fixed lookahead (200 ms) so notes
+ *     always land in the future even if resume() takes ~150 ms on iOS.
+ *   • Visual setTimeout offsets are aligned to the same absolute times.
  */
 
 export type DrumHit = 'P' | 'C' | 'S';
 
-// ─── White noise buffer (1 s, cached) ────────────────────────────────────────
+// ─── Shared AudioContext singleton ───────────────────────────────────────────
 
-let noiseBuffer: AudioBuffer | null = null;
+let _ctx: AudioContext | null = null;
+
+export function getAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  if (_ctx) return _ctx;
+  const Ctor =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Ctor) return null;
+  _ctx = new Ctor();
+  return _ctx;
+}
+
+/**
+ * MUST be called synchronously inside the onClick handler.
+ * Resumes the context AND fires a silent node — this is the iOS unlock trick.
+ */
+export function unlockAudioContext(ctx: AudioContext): void {
+  // Resume (no-op if already running)
+  void ctx.resume();
+
+  // Play a silent oscillator for 1 ms — this is what actually unlocks iOS
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, ctx.currentTime); // silent
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.001);
+}
+
+// ─── Noise buffer ─────────────────────────────────────────────────────────────
+
+let _noiseBuf: AudioBuffer | null = null;
+let _noiseSR  = 0;
 
 function getNoiseBuffer(ctx: AudioContext): AudioBuffer {
-  if (noiseBuffer && noiseBuffer.sampleRate === ctx.sampleRate) return noiseBuffer;
-  const len = ctx.sampleRate; // 1 second
-  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  if (_noiseBuf && _noiseSR === ctx.sampleRate) return _noiseBuf;
+  const len  = ctx.sampleRate * 2; // 2 s
+  const buf  = ctx.createBuffer(1, len, ctx.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-  noiseBuffer = buf;
+  _noiseBuf = buf;
+  _noiseSR  = ctx.sampleRate;
   return buf;
 }
 
-// ─── Individual hit synthesisers ─────────────────────────────────────────────
+function makeNoise(ctx: AudioContext): AudioBufferSourceNode {
+  const src  = ctx.createBufferSource();
+  src.buffer = getNoiseBuffer(ctx);
+  src.loop   = false;
+  return src;
+}
+
+// ─── Drum synthesisers ────────────────────────────────────────────────────────
 
 function playKick(ctx: AudioContext, when: number): void {
-  // Pitched sweep: 150 → 40 Hz
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+  // Sine sweep 160 → 45 Hz
+  const osc     = ctx.createOscillator();
+  const oscGain = ctx.createGain();
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(150, when);
-  osc.frequency.exponentialRampToValueAtTime(40, when + 0.35);
-  gain.gain.setValueAtTime(0, when);
-  gain.gain.linearRampToValueAtTime(0.9, when + 0.004);
-  gain.gain.exponentialRampToValueAtTime(0.0001, when + 0.38);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
+  osc.frequency.setValueAtTime(160, when);
+  osc.frequency.exponentialRampToValueAtTime(45, when + 0.4);
+  oscGain.gain.setValueAtTime(0.001, when);
+  oscGain.gain.linearRampToValueAtTime(1.8, when + 0.005);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, when + 0.42);
+  osc.connect(oscGain);
+  oscGain.connect(ctx.destination);
   osc.start(when);
-  osc.stop(when + 0.40);
+  osc.stop(when + 0.44);
 
-  // Transient click (very short noise burst)
-  const noise = ctx.createBufferSource();
-  noise.buffer = getNoiseBuffer(ctx);
+  // Click transient
+  const noise     = makeNoise(ctx);
+  const hpf       = ctx.createBiquadFilter();
   const noiseGain = ctx.createGain();
-  const hpf = ctx.createBiquadFilter();
-  hpf.type = 'highpass';
-  hpf.frequency.value = 1200;
-  noiseGain.gain.setValueAtTime(0.25, when);
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, when + 0.025);
+  hpf.type            = 'highpass';
+  hpf.frequency.value = 1800;
+  noiseGain.gain.setValueAtTime(0.6, when);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, when + 0.03);
   noise.connect(hpf);
   hpf.connect(noiseGain);
   noiseGain.connect(ctx.destination);
   noise.start(when);
-  noise.stop(when + 0.03);
+  noise.stop(when + 0.04);
 }
 
 function playSnare(ctx: AudioContext, when: number): void {
-  // Body: bandpass noise
-  const noise = ctx.createBufferSource();
-  noise.buffer = getNoiseBuffer(ctx);
-  const bpf = ctx.createBiquadFilter();
-  bpf.type = 'bandpass';
-  bpf.frequency.value = 250;
-  bpf.Q.value = 0.7;
+  // Noise body
+  const noise     = makeNoise(ctx);
+  const bpf       = ctx.createBiquadFilter();
   const noiseGain = ctx.createGain();
-  noiseGain.gain.setValueAtTime(0.6, when);
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, when + 0.18);
+  bpf.type            = 'bandpass';
+  bpf.frequency.value = 300;
+  bpf.Q.value         = 0.6;
+  noiseGain.gain.setValueAtTime(1.2, when);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, when + 0.2);
   noise.connect(bpf);
   bpf.connect(noiseGain);
   noiseGain.connect(ctx.destination);
   noise.start(when);
-  noise.stop(when + 0.20);
+  noise.stop(when + 0.22);
 
-  // Crack: short pitched tone
-  const osc = ctx.createOscillator();
+  // Pitched crack
+  const osc     = ctx.createOscillator();
   const oscGain = ctx.createGain();
   osc.type = 'triangle';
-  osc.frequency.setValueAtTime(180, when);
-  osc.frequency.exponentialRampToValueAtTime(100, when + 0.05);
-  oscGain.gain.setValueAtTime(0.3, when);
-  oscGain.gain.exponentialRampToValueAtTime(0.0001, when + 0.06);
+  osc.frequency.setValueAtTime(220, when);
+  osc.frequency.exponentialRampToValueAtTime(110, when + 0.06);
+  oscGain.gain.setValueAtTime(0.6, when);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, when + 0.07);
   osc.connect(oscGain);
   oscGain.connect(ctx.destination);
   osc.start(when);
-  osc.stop(when + 0.07);
+  osc.stop(when + 0.08);
 }
 
 function playCymbal(ctx: AudioContext, when: number): void {
-  const noise = ctx.createBufferSource();
-  noise.buffer = getNoiseBuffer(ctx);
-  const hpf = ctx.createBiquadFilter();
-  hpf.type = 'highpass';
-  hpf.frequency.value = 5000;
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.35, when);
-  gain.gain.exponentialRampToValueAtTime(0.0001, when + 0.42);
-  noise.connect(hpf);
-  hpf.connect(gain);
+  const noise = makeNoise(ctx);
+  const hpf1  = ctx.createBiquadFilter();
+  const hpf2  = ctx.createBiquadFilter();
+  const gain  = ctx.createGain();
+  hpf1.type = 'highpass'; hpf1.frequency.value = 6000;
+  hpf2.type = 'highpass'; hpf2.frequency.value = 8000;
+  gain.gain.setValueAtTime(0.8, when);
+  gain.gain.exponentialRampToValueAtTime(0.001, when + 0.45);
+  noise.connect(hpf1);
+  hpf1.connect(hpf2);
+  hpf2.connect(gain);
   gain.connect(ctx.destination);
   noise.start(when);
-  noise.stop(when + 0.45);
+  noise.stop(when + 0.5);
 }
 
 // ─── Sequence scheduler ───────────────────────────────────────────────────────
 
 /**
- * @param ctx     AudioContext (already resumed by caller on user gesture)
- * @param hits    Array of drum hits to play
- * @param bpm     Tempo in beats per minute (16th-note grid)
- * @param onNote  Called with the note index just before it plays (visual sync)
- * @param onEnd   Called when the last note has finished
- * @returns cancel function — clears all pending visual timers
+ * Schedule all drum hits and their visual callbacks.
+ *
+ * Call unlockAudioContext(ctx) BEFORE this, synchronously in onClick.
+ * This function itself is synchronous — no await — so notes are always
+ * scheduled before any Promise microtask runs.
  */
 export function playDrumSequence(
   ctx: AudioContext,
@@ -138,46 +173,38 @@ export function playDrumSequence(
   onNote: (index: number) => void,
   onEnd: () => void,
 ): () => void {
-  const stepMs = (60 / bpm / 4) * 1000; // duration of one 16th note in ms
-  const stepSec = stepMs / 1000;
-  const startTime = ctx.currentTime + 0.05; // small lookahead
-
-  const timers: ReturnType<typeof window.setTimeout>[] = [];
+  const stepSec    = 60 / bpm / 4;
+  const stepMs     = stepSec * 1000;
+  // 200 ms lookahead — covers iOS resume latency (~80–150 ms) with margin
+  const startTime  = ctx.currentTime + 0.20;
+  const timers: number[] = [];
+  let   cancelled  = false;
 
   hits.forEach((hit, i) => {
-    const when = startTime + i * stepSec;
-    const delayMs = (when - ctx.currentTime) * 1000;
+    const when    = startTime + i * stepSec;
+    const delayMs = Math.max(0, (when - ctx.currentTime) * 1000 - 15);
 
-    // Schedule audio (sample-accurate)
+    // Audio (synchronous, sample-accurate)
     switch (hit) {
       case 'P': playKick(ctx, when);   break;
       case 'C': playSnare(ctx, when);  break;
       case 'S': playCymbal(ctx, when); break;
     }
 
-    // Schedule visual highlight (setTimeout aligned to same offset)
+    // Visual (setTimeout aligned to audio time)
     timers.push(
-      window.setTimeout(() => onNote(i), Math.max(0, delayMs - 20))
+      window.setTimeout(() => { if (!cancelled) onNote(i); }, delayMs)
     );
   });
 
-  // "Done" callback — fires after the last note has had time to decay
-  const totalMs = hits.length * stepMs + 500;
+  // End callback
+  const endMs = Math.max(0, (startTime - ctx.currentTime) * 1000 + hits.length * stepMs + 400);
   timers.push(
-    window.setTimeout(onEnd, (startTime - ctx.currentTime) * 1000 + totalMs)
+    window.setTimeout(() => { if (!cancelled) onEnd(); }, endMs)
   );
 
-  return () => timers.forEach(window.clearTimeout);
-}
-
-// ─── AudioContext factory (browser-compat) ───────────────────────────────────
-
-export function getOrCreateAudioContext(): AudioContext | null {
-  if (typeof window === 'undefined') return null;
-  const Ctor =
-    window.AudioContext ||
-    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!Ctor) return null;
-  const ctx = new Ctor();
-  return ctx;
+  return () => {
+    cancelled = true;
+    timers.forEach(window.clearTimeout);
+  };
 }
