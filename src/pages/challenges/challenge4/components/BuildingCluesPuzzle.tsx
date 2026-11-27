@@ -44,49 +44,49 @@ export function BuildingCluesPuzzle({ isSolved, onSolve, onWrongAttempt }: Build
     <div className="space-y-6">
 
       {/* ── Formula card ── */}
-      <div className="rounded-2xl border border-white/10 bg-[#051029]/70 p-5 sm:p-6">
-        <p className="mb-5 text-xs font-bold uppercase tracking-[0.16em] text-[#F5C542]">
-          Formule de déverrouillage
+      <div className="rounded-2xl border border-dashed border-[#00B8FF]/70 bg-[#071A3B]/75 p-5 sm:p-6">
+        <p className="mb-5 text-center text-xs font-bold uppercase tracking-[0.16em] text-[#00B8FF]">
+          Reconstitue le code d'accès
         </p>
 
         {/* Visual formula */}
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
           {/* Factor A */}
-          <div className="flex flex-col items-center gap-1.5 rounded-xl border border-[#38BDF8]/30 bg-[#38BDF8]/5 px-5 py-4 text-center">
-            <span className="font-mono text-2xl font-black text-[#38BDF8]">A</span>
+          <div className="flex min-w-[130px] flex-col items-center gap-1.5 rounded-xl border border-[#00B8FF]/40 bg-[#00B8FF]/[0.07] px-5 py-4 text-center">
+            <span className="font-mono text-2xl font-black text-[#00B8FF]">A</span>
             <span className="text-xs text-slate-400 leading-tight">
-              Nombre de<br />sessions aujourd'hui
+              Sessions au<br />programme
             </span>
           </div>
 
-          <span className="text-2xl font-thin text-slate-500">×</span>
+          <span className="text-2xl font-light text-slate-400">×</span>
 
           {/* Factor B */}
-          <div className="flex flex-col items-center gap-1.5 rounded-xl border border-[#F5C542]/30 bg-[#F5C542]/5 px-5 py-4 text-center">
-            <span className="font-mono text-2xl font-black text-[#F5C542]">B</span>
+          <div className="flex min-w-[130px] flex-col items-center gap-1.5 rounded-xl border border-[#F22555]/40 bg-[#F22555]/[0.07] px-5 py-4 text-center">
+            <span className="font-mono text-2xl font-black text-[#F22555]">B</span>
             <span className="text-xs text-slate-400 leading-tight">
               Membres du<br />bureau (core team)
             </span>
           </div>
 
-          <span className="text-2xl font-thin text-slate-500">=</span>
+          <span className="text-2xl font-light text-slate-400">=</span>
 
           {/* Result slot */}
-          <div className="flex flex-col items-center gap-1.5 rounded-xl border border-dashed border-white/30 bg-white/5 px-5 py-4 text-center">
-            <span className="font-mono text-2xl font-black text-slate-300">?</span>
-            <span className="text-xs text-slate-500">Ton résultat</span>
+          <div className="flex min-w-[130px] flex-col items-center gap-1.5 rounded-xl border border-dashed border-[#00B8FF]/50 bg-[#00B8FF]/[0.04] px-5 py-4 text-center">
+            <span className="font-mono text-2xl font-black text-white">?</span>
+            <span className="text-xs text-slate-300">Code à trouver</span>
           </div>
         </div>
 
         <p className="mt-5 text-center text-xs text-slate-500">
-          Observe l'environnement autour de toi — les réponses sont dans la salle.
+          Observe la salle et multiplie les deux valeurs relevées.
         </p>
       </div>
 
       {/* ── Input ── */}
       <motion.form
         onSubmit={handleSubmit}
-        className="flex gap-3"
+        className="flex flex-col gap-3 sm:flex-row"
         animate={shake ? { x: [-6, 6, -4, 4, 0] } : { x: 0 }}
         transition={{ duration: 0.4 }}
       >
@@ -106,12 +106,12 @@ export function BuildingCluesPuzzle({ isSolved, onSolve, onWrongAttempt }: Build
             setInput(e.target.value);
           }}
           placeholder="Entrez le résultat"
-          className="min-h-[48px] flex-1 rounded-xl border border-white/15 bg-[#051029] px-4 font-mono text-lg font-bold text-[#F5C542] placeholder:text-slate-500 focus:border-[#F5C542] focus:outline-none disabled:opacity-60"
+          className="min-h-[48px] flex-1 rounded-xl border border-white/15 bg-[#051029] px-4 font-mono text-lg font-bold text-white placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:text-slate-400 focus:border-[#00B8FF] focus:outline-none disabled:opacity-60"
         />
         <button
           type="submit"
           disabled={isSolved || input.trim() === ''}
-          className="min-h-[48px] shrink-0 rounded-xl bg-[#C8102E] px-6 text-sm font-bold text-white transition-colors hover:bg-[#E11D3F] disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-[48px] shrink-0 rounded-xl bg-[#E11D48] px-6 text-sm font-bold text-white transition-colors hover:bg-[#F22555] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSolved ? 'Déverrouillé' : 'Valider'}
         </button>
