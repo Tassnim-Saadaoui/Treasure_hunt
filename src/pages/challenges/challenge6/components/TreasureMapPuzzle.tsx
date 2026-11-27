@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { LayoutGroup, motion } from 'motion/react';
 import { ArrowLeftRight, Shuffle } from 'lucide-react';
 import { soundEngine } from '../../../../lib/audio/soundEngine';
 import piece1 from '../puzzle/1.png';
@@ -154,38 +154,45 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
           </span>
         </div>
 
-        <div className="mx-auto grid aspect-square w-full max-w-[520px] grid-cols-3 grid-rows-4 gap-0 overflow-visible rounded-2xl border border-[#D2AE63]/70 bg-[#D8C18C] p-1.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)] sm:p-2" aria-label="Puzzle de la carte au trésor, douze pièces à remettre dans l’ordre">
-          {pieces.map((pieceNumber, position) => {
-            const isSelected = selectedPosition === position;
-            const isSnapping = snappingPieces.includes(pieceNumber);
-            return (
-              <button
-                key={position}
-                type="button"
-                onClick={() => handlePieceClick(position)}
-                aria-label={`Pièce du puzzle à la position ${position + 1}${isSelected ? ', sélectionnée' : ''}`}
-                aria-pressed={isSelected}
-                disabled={isSolved}
-                className={`relative isolate z-0 flex min-h-0 min-w-0 items-center justify-center overflow-visible rounded-md border border-transparent bg-transparent transition-[border-color,transform,filter] duration-150 focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] disabled:cursor-default ${
-                  isSelected
-                    ? 'z-20 scale-[0.97] border-[#F5C542] shadow-[0_0_0_3px_rgba(245,197,66,0.28)]'
-                    : 'hover:z-10 hover:border-[#F5C542]/80'
-                }`}
-              >
-                <motion.img
-                  key={pieceNumber}
-                  src={PIECE_IMAGES[pieceNumber - 1]}
-                  alt=""
-                  draggable={false}
-                  initial={false}
-                  animate={isSnapping ? { scale: [0.96, 1.06, 1], rotate: [0, -1.5, 0] } : { scale: 1, rotate: 0 }}
-                  transition={{ duration: 0.28, ease: 'easeOut' }}
-                  className="pointer-events-none absolute h-[170%] w-[170%] max-w-none select-none object-contain"
-                />
-              </button>
-            );
-          })}
-        </div>
+        <LayoutGroup id="challenge6-puzzle-pieces">
+          <div className="mx-auto grid aspect-square w-full max-w-[520px] grid-cols-3 grid-rows-4 gap-0 overflow-visible rounded-2xl border border-[#D2AE63]/70 bg-[#D8C18C] p-1.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)] sm:p-2" aria-label="Puzzle de la carte au trésor, douze pièces à remettre dans l’ordre">
+            {pieces.map((pieceNumber, position) => {
+              const isSelected = selectedPosition === position;
+              const isSnapping = snappingPieces.includes(pieceNumber);
+              return (
+                <button
+                  key={position}
+                  type="button"
+                  onClick={() => handlePieceClick(position)}
+                  aria-label={`Pièce du puzzle à la position ${position + 1}${isSelected ? ', sélectionnée' : ''}`}
+                  aria-pressed={isSelected}
+                  disabled={isSolved}
+                  className={`relative isolate z-0 flex min-h-0 min-w-0 items-center justify-center overflow-visible rounded-md border border-transparent bg-transparent transition-[border-color,transform,filter] duration-150 focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] disabled:cursor-default ${
+                    isSelected
+                      ? 'z-20 scale-[0.97] border-[#F5C542] shadow-[0_0_0_3px_rgba(245,197,66,0.28)]'
+                      : 'hover:z-10 hover:border-[#F5C542]/80'
+                  }`}
+                >
+                  <motion.img
+                    key={pieceNumber}
+                    layoutId={`treasure-piece-${pieceNumber}`}
+                    src={PIECE_IMAGES[pieceNumber - 1]}
+                    alt=""
+                    draggable={false}
+                    initial={false}
+                    animate={isSnapping ? { scale: [0.96, 1.06, 1], rotate: [0, -1.5, 0] } : { scale: 1, rotate: 0 }}
+                    transition={{
+                      layout: { type: 'spring', stiffness: 560, damping: 34 },
+                      scale: { type: 'spring', stiffness: 600, damping: 19 },
+                      rotate: { duration: 0.28, ease: 'easeOut' },
+                    }}
+                    className="pointer-events-none absolute h-[170%] w-[170%] max-w-none select-none object-contain drop-shadow-[0_0_1px_rgba(255,255,255,0.9)] drop-shadow-[0_1px_2px_rgba(83,56,20,0.5)]"
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </LayoutGroup>
 
         <div className="mt-3 flex items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-xs text-slate-400">
