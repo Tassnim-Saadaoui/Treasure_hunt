@@ -272,60 +272,48 @@ export function DrumSequencePuzzle({ isSolved, onSolve, onWrongAttempt }: DrumSe
           Partition de batterie
         </p>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-          {MEASURES.map((m, mi) => (
-            <div key={mi} className="flex items-center gap-1">
-              <span className="mr-1 text-[10px] font-bold text-slate-500">{mi + 1}.</span>
-
-              {m.hits.map((hit, hi) => {
-                const globalIndex = m.startIndex + hi;
-                return (
-                  <motion.div
-                    key={hi}
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: globalIndex * 0.035, type: 'spring', stiffness: 400, damping: 20 }}
-                  >
-                    <NoteBadge hit={hit} globalIndex={globalIndex} />
-                  </motion.div>
-                );
-              })}
-
-              {/* Blank slots on last measure */}
-              {mi === MEASURES.length - 1 && [0, 1].map((slotIdx) => {
-                const globalIndex = SEQUENCE.length + slotIdx;
-                const isActive = playingIndex === globalIndex;
-                return (
-                  <motion.div
-                    key={`slot-${slotIdx}`}
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.55 + slotIdx * 0.07, type: 'spring', stiffness: 400, damping: 20 }}
-                  >
-                    <div
-                      className={`relative inline-flex h-9 w-9 items-center justify-center rounded-lg border-2 text-sm font-black transition-all duration-150 ${
-                        slots[slotIdx] !== null
-                          ? wrongSlot === slotIdx
-                            ? 'border-[#E11D3F] bg-[#E11D3F]/20 text-white'
-                            : submitted
-                            ? 'border-emerald-400 bg-emerald-400/20 text-white'
-                            : 'border-[#F5C542]/80 bg-[#F5C542]/15 text-white'
-                          : isActive
-                          ? 'border-[#F5C542] bg-[#F5C542]/20 text-[#F5C542]'
-                          : 'border-dashed border-white/30 bg-white/5 text-slate-500'
-                      }`}
-                    >
-                      {slots[slotIdx] ?? '?'}
-                    </div>
-                  </motion.div>
-                );
-              })}
-
-              {mi < MEASURES.length - 1 && (
-                <span className="ml-1 select-none text-lg font-thin text-slate-600">|</span>
-              )}
-            </div>
+        {/* All notes in a single continuous flow — no measure markers */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {SEQUENCE.map((hit, globalIndex) => (
+            <motion.div
+              key={globalIndex}
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: globalIndex * 0.03, type: 'spring', stiffness: 400, damping: 20 }}
+            >
+              <NoteBadge hit={hit} globalIndex={globalIndex} />
+            </motion.div>
           ))}
+
+          {/* Two blank slots, visually continuous with the rest */}
+          {[0, 1].map((slotIdx) => {
+            const globalIndex = SEQUENCE.length + slotIdx;
+            const isActive = playingIndex === globalIndex;
+            return (
+              <motion.div
+                key={`slot-${slotIdx}`}
+                initial={{ scale: 0.7, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.48 + slotIdx * 0.06, type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <div
+                  className={`relative inline-flex h-9 w-9 items-center justify-center rounded-lg border-2 text-sm font-black transition-all duration-150 ${
+                    slots[slotIdx] !== null
+                      ? wrongSlot === slotIdx
+                        ? 'border-[#E11D3F] bg-[#E11D3F]/20 text-white'
+                        : submitted
+                        ? 'border-emerald-400 bg-emerald-400/20 text-white'
+                        : 'border-[#F5C542]/80 bg-[#F5C542]/15 text-white'
+                      : isActive
+                      ? 'border-[#F5C542] bg-[#F5C542]/20 text-[#F5C542]'
+                      : 'border-dashed border-white/30 bg-white/5 text-slate-500'
+                  }`}
+                >
+                  {slots[slotIdx] ?? '?'}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Legend */}
@@ -345,7 +333,7 @@ export function DrumSequencePuzzle({ isSolved, onSolve, onWrongAttempt }: DrumSe
           {[0, 1].map((slotIdx) => (
             <div key={slotIdx} className="rounded-2xl border border-white/10 bg-[#081C4A] p-4">
               <p className="mb-3 text-xs font-semibold text-slate-400">
-                Note {14 + slotIdx} — Case {slotIdx + 1}
+                Case {slotIdx + 1}
                 {wrongSlot === slotIdx && (
                   <span className="ml-2 font-bold text-[#E11D3F]">✗ incorrect</span>
                 )}
