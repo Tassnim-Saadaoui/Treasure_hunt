@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowRight, Bird, Compass, LockKeyhole, MapPinned, Sparkles } from 'lucide-react';
 import type { ChallengePageProps } from '../types';
 import { TreasureMapPuzzle } from './components/TreasureMapPuzzle';
+import goalImage from './puzzle/goal.png';
 
 export function Challenge6Page({
   completedIds,
@@ -50,21 +51,32 @@ export function Challenge6Page({
       )}
 
       {hasSolved && isUnlocked && (
-        <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-[#F5C542]/30 bg-[#F5C542]/[0.07] p-5 sm:flex-row sm:p-6">
-          <div className="flex items-start gap-3">
-            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-[#F5C542]" />
-            <div>
-              <p className="font-semibold text-white">La carte est reconstituée !</p>
-              <p className="mt-1 text-sm text-slate-300">Le X indique l’endroit où creuser. Garde le code révélé pour la suite de l’aventure.</p>
+        <div className="grid gap-5 rounded-2xl border border-[#F5C542]/30 bg-[#F5C542]/[0.07] p-4 sm:p-6 md:grid-cols-[minmax(0,1.15fr)_minmax(240px,0.85fr)] md:items-center">
+          <img
+            src={goalImage}
+            alt="La carte au trésor reconstituée, avec un X rouge indiquant où creuser."
+            className="mx-auto w-full max-w-xl rounded-xl border border-[#D2AE63]/40 shadow-lg"
+          />
+          <div className="flex flex-col items-start gap-4">
+            <div className="flex items-start gap-3">
+              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-[#F5C542]" />
+              <div>
+                <p className="font-semibold text-white">La carte est reconstituée !</p>
+                <p className="mt-1 text-sm text-slate-300">Le X indique l’endroit où creuser. Garde le code révélé pour la suite de l’aventure.</p>
+              </div>
             </div>
+            <div className="w-full rounded-xl border border-[#F5C542]/40 bg-[#F5C542]/10 p-4 text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#F5C542]">Code pour la suite</p>
+              <p className="mt-1 font-mono text-3xl font-black tracking-[0.3em] text-white">X</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onVoyageToMap(6)}
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#C8102E] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#E11D3F]"
+            >
+              Terminer l’expédition <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => onVoyageToMap(6)}
-            className="flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#C8102E] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#E11D3F] sm:w-auto"
-          >
-            Terminer l’expédition <ArrowRight className="h-4 w-4" />
-          </button>
         </div>
       )}
 

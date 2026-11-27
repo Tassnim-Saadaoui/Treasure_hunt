@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeftRight, Check, RotateCcw, Shuffle } from 'lucide-react';
+import { ArrowLeftRight, Shuffle } from 'lucide-react';
 import { soundEngine } from '../../../../lib/audio/soundEngine';
 import piece1 from '../puzzle/1.png';
 import piece2 from '../puzzle/2.png';
@@ -13,7 +13,6 @@ import piece9 from '../puzzle/9.png';
 import piece10 from '../puzzle/10.png';
 import piece11 from '../puzzle/11.png';
 import piece12 from '../puzzle/12.png';
-import goalImage from '../puzzle/goal.png';
 
 interface TreasureMapPuzzleProps {
   isSolved: boolean;
@@ -87,7 +86,7 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
   };
 
   return (
-    <section className="grid gap-5 rounded-3xl border border-white/10 bg-[#0A1B42] p-4 shadow-xl sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(240px,0.72fr)] lg:gap-7 lg:p-7">
+    <section className="mx-auto w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0A1B42] p-4 shadow-xl sm:p-6 lg:p-7">
       <div>
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
@@ -143,35 +142,7 @@ export function TreasureMapPuzzle({ isSolved, onSolve }: TreasureMapPuzzleProps)
         </div>
       </div>
 
-      <aside className="flex flex-col justify-center rounded-2xl border border-white/10 bg-[#051029]/65 p-5 sm:p-6">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Indice du vieux pirate</p>
-        <p className="mt-3 font-display text-xl font-semibold leading-snug text-white">« Gérard, rends-moi ma carte ! »</p>
-        <p className="mt-3 text-sm leading-relaxed text-slate-300">
-          Observe les formes des morceaux et raccorde les éléments du dessin : le rivage, la boussole, le bateau et le chemin pointillé.
-        </p>
-
-        {isSolved ? (
-          <div className="mt-5 space-y-3" role="status" aria-live="polite">
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-200">
-              <Check className="h-5 w-5 shrink-0" /> Carte reconstituée : le X indique où creuser !
-            </div>
-            <img
-              src={goalImage}
-              alt="Carte au trésor reconstituée : un X rouge indique l’emplacement du trésor."
-              className="w-full rounded-xl border border-[#D2AE63]/50"
-            />
-            <div className="rounded-xl border border-[#F5C542]/40 bg-[#F5C542]/10 p-4 text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#F5C542]">Code pour la suite</p>
-              <p className="mt-1 font-mono text-3xl font-black tracking-[0.3em] text-white">X</p>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-5 flex items-center gap-2 rounded-xl border border-[#F5C542]/15 bg-[#F5C542]/[0.06] px-4 py-3 text-xs leading-relaxed text-slate-300">
-            <RotateCcw className="h-4 w-4 shrink-0 text-[#F5C542]" />
-            Si tu te trompes, échange simplement d’autres pièces pour poursuivre la reconstitution.
-          </div>
-        )}
-      </aside>
+      
     </section>
   );
 }
