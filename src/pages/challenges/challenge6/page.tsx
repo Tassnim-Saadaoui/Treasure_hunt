@@ -4,7 +4,16 @@ import { AnimatePresence, motion } from 'motion/react';
 import type { ChallengePageProps } from '../types';
 import { TreasureMapPuzzle } from './components/TreasureMapPuzzle';
 import { ParrotEntranceAnimation } from './components/ParrotEntranceAnimation';
+import { PieceScatterTransition } from './components/PieceScatterTransition';
 import goalImage from './puzzle/goal.png';
+
+/**
+ * Séquence d'entrée :
+ *   phase 'parrot'   → perroquet vole et sort de l'écran
+ *   phase 'scatter'  → fragments tombent puis convergent (lien narratif)
+ *   phase 'puzzle'   → puzzle fade-in, interactif
+ */
+type Phase = 'parrot' | 'scatter' | 'puzzle';
 
 export function Challenge6Page({
   completedIds,
@@ -14,8 +23,9 @@ export function Challenge6Page({
 }: ChallengePageProps) {
   const alreadySolved = completedIds.includes(6);
   const [hasSolved, setHasSolved] = useState(alreadySolved);
-  // Show the parrot intro only the first time the player enters an unlocked, unsolved puzzle.
-  const [showIntro, setShowIntro] = useState(isUnlocked && !alreadySolved);
+  const [phase, setPhase] = useState<Phase>(
+    isUnlocked && !alreadySolved ? 'parrot' : 'puzzle'
+  );
 
   const handleSolve = () => {
     setHasSolved(true);
@@ -53,21 +63,31 @@ export function Challenge6Page({
         </div>
       ) : (
         <>
-          {/* Parrot intro — fixed full-screen overlay, pointer-events-none */}
+          {/* ── Phase 1 : perroquet ── */}
           <AnimatePresence>
-            {showIntro && (
+            {phase === 'parrot' && (
               <ParrotEntranceAnimation
-                key="parrot-intro"
-                onDone={() => setShowIntro(false)}
+                key="parrot"
+                onDone={() => setPhase('scatter')}
               />
             )}
           </AnimatePresence>
 
-          {/* Puzzle fades in once the intro finishes */}
+          {/* ── Phase 2 : fragments éparpillés → convergence ── */}
+          <AnimatePresence>
+            {phase === 'scatter' && (
+              <PieceScatterTransition
+                key="scatter"
+                onDone={() => setPhase('puzzle')}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* ── Phase 3 : puzzle (fade-in depuis opacity 0) ── */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: showIntro ? 0 : 1 }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
+            animate={{ opacity: phase === 'puzzle' ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
           >
             <TreasureMapPuzzle
               isSolved={hasSolved}
