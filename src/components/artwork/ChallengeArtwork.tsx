@@ -1,5 +1,5 @@
 import type { ChallengeId } from '../../domain/hunt/types';
-import { Building2, Compass, Drum, MapPinned } from 'lucide-react';
+import { AlertTriangle, Building2, BotMessageSquare, Compass, Drum, MapPinned, Plane } from 'lucide-react';
 
 interface ArtworkProps {
   className?: string;
@@ -211,20 +211,38 @@ export function TreasureChestIllustration({ className = 'w-32 h-32' }: ArtworkPr
 }
 
 export function ChallengeIcon({ id, className }: { id: ChallengeId; className?: string }) {
+  const cls = className ?? 'h-16 w-16';
   switch (id) {
     case 1:
-      return <CompassIllustration className={className} />;
+      return <CompassIllustration className={cls} />;
+
+    // Challenge 2 — Drone de livraison : Plane + AlertTriangle badge
     case 2:
-      return <GearsIllustration className={className} />;
+      return (
+        <span className={`relative inline-flex shrink-0 items-center justify-center ${cls}`} aria-hidden="true">
+          <Plane className="h-[82%] w-[82%] rotate-[-18deg] text-[#00aaff]" strokeWidth={1.6} />
+          <AlertTriangle className="absolute bottom-0 right-0 h-[38%] w-[38%] rounded-full bg-[#061433] p-[2px] text-orange-400" strokeWidth={2.5} />
+        </span>
+      );
+
+    // Challenge 3 — Paradoxe des Trois Serveurs : chatbot / IA
     case 3:
-      return <MapMagnifierIllustration className={className} />;
+      return (
+        <span className={`relative inline-flex shrink-0 items-center justify-center ${cls}`} aria-hidden="true">
+          <BotMessageSquare className="h-[82%] w-[82%] text-[#00aaff]" strokeWidth={1.5} />
+        </span>
+      );
+
     case 4:
-      return <Building2 className={className ? `${className} text-[#00B8FF]` : 'h-16 w-16 text-[#00B8FF]'} strokeWidth={1.5} />;
+      return <Building2 className={`${cls} text-[#00B8FF]`} strokeWidth={1.5} />;
+
+    // Challenge 5 — Rythme en Studio : Drum icon (unchanged, already correct)
     case 5:
-      return <Drum className={className ? `${className} text-[#00B8FF]` : 'h-16 w-16 text-[#00B8FF]'} strokeWidth={1.5} />;
+      return <Drum className={`${cls} text-[#F5C542]`} strokeWidth={1.5} />;
+
     case 6:
       return (
-        <span className={`relative inline-flex shrink-0 items-center justify-center ${className ?? 'h-16 w-16'}`} aria-hidden="true">
+        <span className={`relative inline-flex shrink-0 items-center justify-center ${cls}`} aria-hidden="true">
           <Compass className="h-[82%] w-[82%] text-[#00B8FF]" strokeWidth={1.5} />
           <MapPinned className="absolute bottom-[2%] right-[1%] h-[42%] w-[42%] rounded-full bg-[#061433] p-[2px] text-[#F22555]" strokeWidth={2} />
         </span>
