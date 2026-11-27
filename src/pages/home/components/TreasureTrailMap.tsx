@@ -36,26 +36,28 @@ interface TrailSegment {
   p3: Point;
 }
 
-// ─── SVG viewBox: 100 × 100 (coordonnées en %) ───────────────────────────────
-// Cercles centrés à x=43% (impairs) et x=57% (pairs) pour laisser 34% libres
-// de chaque côté aux icônes et titres longs sur mobile.
+// ─── SVG viewBox: 100 × 175 (ratio ~1:1 avec un conteneur 360×630) ──────────
+// Écart horizontal x=38 ↔ x=62 avec pas vertical dy=25 → vrai zigzag à ~45°
+// et pointillés parfaitement réguliers.
+
+const SVG_HEIGHT = 175;
 
 const NODE_POS: Record<number, Point> = {
-  1: { x: 43, y: 7 },
-  2: { x: 57, y: 21.5 },
-  3: { x: 43, y: 36 },
-  4: { x: 57, y: 50.5 },
-  5: { x: 43, y: 65 },
-  6: { x: 57, y: 79.5 },
+  1: { x: 38, y: 12 },
+  2: { x: 62, y: 37 },
+  3: { x: 38, y: 62 },
+  4: { x: 62, y: 87 },
+  5: { x: 38, y: 112 },
+  6: { x: 62, y: 137 },
 };
 
 const TRAIL_SEGMENTS: TrailSegment[] = [
-  { id: 1, d: 'M 43 7    C 56 10,   60 16,   57 21.5', p0: { x: 43, y: 7 },    p1: { x: 56, y: 10 },   p2: { x: 60, y: 16 },   p3: { x: 57, y: 21.5 } },
-  { id: 2, d: 'M 57 21.5 C 54 27,   42 30.5, 43 36',   p0: { x: 57, y: 21.5 }, p1: { x: 54, y: 27 },   p2: { x: 42, y: 30.5 }, p3: { x: 43, y: 36 } },
-  { id: 3, d: 'M 43 36   C 44 41.5, 58 45,   57 50.5', p0: { x: 43, y: 36 },   p1: { x: 44, y: 41.5 }, p2: { x: 58, y: 45 },   p3: { x: 57, y: 50.5 } },
-  { id: 4, d: 'M 57 50.5 C 55 56,   42 59.5, 43 65',   p0: { x: 57, y: 50.5 }, p1: { x: 55, y: 56 },   p2: { x: 42, y: 59.5 }, p3: { x: 43, y: 65 } },
-  { id: 5, d: 'M 43 65   C 44 70.5, 58 74,   57 79.5', p0: { x: 43, y: 65 },   p1: { x: 44, y: 70.5 }, p2: { x: 58, y: 74 },   p3: { x: 57, y: 79.5 } },
-  { id: 6, d: 'M 57 79.5 C 52 86.5, 40 90,   28 92.5', p0: { x: 57, y: 79.5 }, p1: { x: 52, y: 86.5 }, p2: { x: 40, y: 90 },   p3: { x: 28, y: 92.5 } },
+  { id: 1, d: 'M 38 12  C 56 15,  65 25,  62 37',  p0: { x: 38, y: 12 },  p1: { x: 56, y: 15 },  p2: { x: 65, y: 25 },  p3: { x: 62, y: 37 } },
+  { id: 2, d: 'M 62 37  C 59 49,  36 50,  38 62',  p0: { x: 62, y: 37 },  p1: { x: 59, y: 49 },  p2: { x: 36, y: 50 },  p3: { x: 38, y: 62 } },
+  { id: 3, d: 'M 38 62  C 40 74,  65 75,  62 87',  p0: { x: 38, y: 62 },  p1: { x: 40, y: 74 },  p2: { x: 65, y: 75 },  p3: { x: 62, y: 87 } },
+  { id: 4, d: 'M 62 87  C 59 99,  36 100, 38 112', p0: { x: 62, y: 87 },  p1: { x: 59, y: 99 },  p2: { x: 36, y: 100 }, p3: { x: 38, y: 112 } },
+  { id: 5, d: 'M 38 112 C 40 124, 65 125, 62 137', p0: { x: 38, y: 112 }, p1: { x: 40, y: 124 }, p2: { x: 65, y: 125 }, p3: { x: 62, y: 137 } },
+  { id: 6, d: 'M 62 137 C 56 152, 40 158, 28 161', p0: { x: 62, y: 137 }, p1: { x: 56, y: 152 }, p2: { x: 40, y: 158 }, p3: { x: 28, y: 161 } },
 ];
 
 const FULL_PATH = TRAIL_SEGMENTS.map((s) => s.d).join(' ');
@@ -162,7 +164,7 @@ export function TreasureTrailMap({
       </svg>
 
       {/* ── Hero ── */}
-      <div className="relative z-10 px-5 pb-3 pt-7 text-center sm:px-6 sm:pb-5 sm:pt-10">
+      <div className="relative z-10 px-5 pb-2 pt-7 text-center sm:px-6 sm:pb-4 sm:pt-10">
         <p className="font-display text-sm font-black tracking-[0.3em] text-[#F5C542] sm:text-base">
           NATEG
         </p>
@@ -179,13 +181,13 @@ export function TreasureTrailMap({
         </p>
       </div>
 
-      {/* ── Zone du parcours (hauteur fixe généreuse sur mobile pour éviter tout tassement) ── */}
+      {/* ── Zone du parcours ── */}
       <div className="relative z-10 px-2 pb-4 sm:px-4">
-        <div className="relative mx-auto h-[760px] w-full max-w-[400px] sm:h-[680px]">
+        <div className="relative mx-auto h-[630px] w-full max-w-[380px] sm:h-[660px] sm:max-w-[400px]">
           {/* Tracé SVG pointillé doré + segments validés en vert */}
           <svg
             aria-hidden="true"
-            viewBox="0 0 100 100"
+            viewBox={`0 0 100 ${SVG_HEIGHT}`}
             preserveAspectRatio="none"
             className="pointer-events-none absolute inset-0 h-full w-full"
           >
@@ -211,10 +213,10 @@ export function TreasureTrailMap({
               d={FULL_PATH}
               fill="none"
               stroke="#F5C542"
-              strokeWidth="1.2"
-              strokeDasharray="2.2 2.5"
+              strokeWidth="1.5"
+              strokeDasharray="2.5 3"
               strokeLinecap="round"
-              opacity="0.78"
+              opacity="0.82"
               filter="url(#goldGlow)"
             />
 
@@ -225,7 +227,7 @@ export function TreasureTrailMap({
                 d={s.d}
                 fill="none"
                 stroke="#4ADE80"
-                strokeWidth="1.8"
+                strokeWidth="2.1"
                 strokeLinecap="round"
                 filter="url(#greenGlow)"
                 initial={voyageTransition?.fromId === s.id ? { pathLength: 0 } : false}
@@ -243,7 +245,10 @@ export function TreasureTrailMap({
             <div
               aria-hidden="true"
               className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${travelPos.x}%`, top: `${travelPos.y}%` }}
+              style={{
+                left: `${travelPos.x}%`,
+                top: `${(travelPos.y / SVG_HEIGHT) * 100}%`,
+              }}
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-400/25 shadow-[0_0_18px_rgba(74,222,128,0.8)]">
                 <Ship className="h-5 w-5 text-emerald-100" />
@@ -257,9 +262,9 @@ export function TreasureTrailMap({
             const isCompleted = completedIds.includes(challenge.id);
             const isUnlocked = challenge.id <= maxUnlockedId || isCompleted;
             const isNext = challenge.id === nextRecommendedId && !isAllCompleted;
-            // Toujours alterner gauche (1,3,5) / droite (2,4,6) pour correspondre au tracé
             const isLeft = challenge.id % 2 === 1;
             const pos = NODE_POS[challenge.id];
+            const topPct = (pos.y / SVG_HEIGHT) * 100;
 
             const handlePick = () => {
               if (!isUnlocked) return;
@@ -271,15 +276,15 @@ export function TreasureTrailMap({
               <div
                 key={challenge.id}
                 className="absolute inset-x-0"
-                style={{ top: `${pos.y}%`, transform: 'translateY(-50%)' }}
+                style={{ top: `${topPct}%`, transform: 'translateY(-50%)' }}
               >
-                {/* Icône sans bordure carrée + libellé borné dans 34% de largeur */}
+                {/* Icône sans bordure + libellé borné à 30% pour éviter tout contact avec le cercle */}
                 <button
                   type="button"
                   disabled={!isUnlocked}
                   onClick={handlePick}
                   aria-label={`Challenge ${challenge.id} — ${challenge.title}`}
-                  className={`group absolute top-1/2 -translate-y-1/2 flex w-[34%] flex-col items-center text-center transition-transform duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] rounded-xl p-1 ${
+                  className={`group absolute top-1/2 -translate-y-1/2 flex w-[30%] flex-col items-center text-center transition-transform duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] rounded-xl p-0.5 ${
                     isLeft ? 'left-[1%]' : 'right-[1%]'
                   } ${
                     isUnlocked
@@ -289,7 +294,7 @@ export function TreasureTrailMap({
                 >
                   <ChallengeIcon
                     id={contentId}
-                    className={`h-10 w-10 drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)] sm:h-12 sm:w-12 ${
+                    className={`h-9 w-9 drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)] sm:h-11 sm:w-11 ${
                       isCompleted
                         ? 'text-emerald-300'
                         : isNext
@@ -304,7 +309,7 @@ export function TreasureTrailMap({
                     Challenge {challenge.id}
                   </span>
                   <span
-                    className={`text-[10px] font-bold leading-snug sm:text-xs ${
+                    className={`text-[10px] font-bold leading-tight sm:text-xs ${
                       isCompleted ? 'text-emerald-300' : 'text-[#F5C542]'
                     }`}
                   >
@@ -312,20 +317,20 @@ export function TreasureTrailMap({
                   </span>
 
                   {!isUnlocked && (
-                    <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] text-slate-400">
+                    <span className="mt-0.5 inline-flex items-center gap-1 text-[9px] text-slate-400 sm:text-[10px]">
                       <Lock className="h-2.5 w-2.5" /> Locked
                     </span>
                   )}
                 </button>
 
-                {/* Cercle numéroté centré sur le sommet de la courbe */}
+                {/* Cercle numéroté centré sur le sommet du zigzag */}
                 <button
                   type="button"
                   disabled={!isUnlocked}
                   onClick={handlePick}
                   style={{ left: `${pos.x}%` }}
                   aria-label={`Ouvrir Challenge ${challenge.id}`}
-                  className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border-2 text-xs font-bold tabular-nums transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] sm:h-11 sm:w-11 sm:text-sm ${
+                  className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border-2 text-xs font-bold tabular-nums transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5C542] sm:h-11 sm:w-11 sm:text-sm ${
                     isCompleted
                       ? 'border-emerald-400 bg-emerald-600 text-white shadow-[0_0_16px_rgba(74,222,128,0.55)] cursor-pointer'
                       : isNext
@@ -344,7 +349,7 @@ export function TreasureTrailMap({
           {/* Coffre au trésor en bas à gauche */}
           <div
             className="absolute"
-            style={{ left: '20%', top: '92.5%', transform: 'translate(-50%, -50%)' }}
+            style={{ left: '20%', top: `${(161 / SVG_HEIGHT) * 100}%`, transform: 'translate(-50%, -50%)' }}
           >
             <TreasureChestIllustration className="h-20 w-24 drop-shadow-[0_10px_22px_rgba(0,0,0,0.7)] sm:h-28 sm:w-32" />
           </div>
@@ -369,9 +374,7 @@ export function TreasureTrailMap({
                 : 'JOIN THE ADVENTURE'}
           </button>
 
-          <p className="mt-3 text-center text-[10px] text-slate-300/80">
-            Un événement organisé par NATEG ISSATSo Student Chapter
-          </p>
+         
         </div>
       </div>
     </section>
